@@ -2235,7 +2235,7 @@ body.replay-mode #replayThumbs{
 })();
 </script>
 <div id="stars"></div>
-<script>(function(){var host=document.getElementById("stars");if(!host)return;var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;var area=innerWidth*innerHeight;var n=reduce?0:Math.round(Math.min(110,Math.max(34,area/17000)));var f=document.createDocumentFragment();for(var k=0;k<n;k++){var d=document.createElement("div");d.className="star";var sz=(Math.random()*1.6+.7).toFixed(2);d.style.cssText="width:"+sz+"px;height:"+sz+"px;left:"+(Math.random()*100).toFixed(3)+"%;top:"+(Math.random()*100).toFixed(3)+"%;--d:"+(Math.random()*3+3).toFixed(2)+"s;--dl:"+(Math.random()*7).toFixed(2)+"s;--op:"+(Math.random()*.45+.35).toFixed(2);f.appendChild(d);}host.appendChild(f);document.addEventListener("visibilitychange",function(){document.body.classList.toggle("bg-paused",document.hidden);});})();</script>
+<script>document.addEventListener("visibilitychange",function(){document.body.classList.toggle("bg-paused",document.hidden);});</script>
 <!-- HUD -->
 <div class="" id="hud">
 <div class="hud-prog"><span id="hudCur">01</span> / <span id="hudTot">28</span></div>
@@ -4404,7 +4404,7 @@ function toggleTheme(){const next=document.documentElement.dataset.theme==='ligh
 updateThemeButton();
 
 // ── STARS ──
-(()=>{const c=document.getElementById('stars');for(let i=0;i<200;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2.2+.5;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*5}s;--dl:${Math.random()*7}s;--op:${.15+Math.random()*.55}`;c.appendChild(s);}})();
+(()=>{const c=document.getElementById('stars');if(!c)return;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const N=Math.round(Math.min(120,Math.max(40,(innerWidth*innerHeight)/16000)));const frag=document.createDocumentFragment();for(let i=0;i<N;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2.2+.5;s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*5}s;--dl:${Math.random()*7}s;--op:${.15+Math.random()*.55}`;frag.appendChild(s);}c.appendChild(frag);})();
 
 // ── SLIDE ORDER (indices map to element order below) ──
 // Slide order is taken directly from the DOM, so every slide stays addressable.

@@ -4390,7 +4390,7 @@ document.addEventListener('visibilitychange',()=>{
 
 </script>
 <!-- MP4 converter is loaded only when the user asks for it, keeping the opening experience fast. -->
-<script src="./A Random Site ✦_files/ffmpeg.min.js.download"></script>
+<script defer src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script>
 // ── THEME ──
 // FINAL DEFAULT: always start this version in the original white/light mode.
@@ -4932,7 +4932,10 @@ let replayMode=false,replayObserver=null,replayScrollRAF=0;
 function replayCleanText(el,fallback=''){
   return (el?.textContent||fallback).replace(/\s+/g,' ').trim();
 }
+const REPLAY_NAMES={sMystery:['the first knock','Something is waiting.'],sGift:['a gift for you','You have a gift.'],sCandle:['make a wish','There is a candle. No flame.'],s0:['welcome in','Happy birthday, properly.'],s1:['the reason','Why this whole thing exists.'],s1b:['cut the cake','Cut the cake.'],sBalloons:['18 balloons','Pop them all.'],sWpCount:['since we first talked','The very first message.'],sSugar:['no filter, no sugar','Unwrap it. See for yourself.'],sAgeTypo:['official age record','Eighteen, on the record.'],s2a:['a suspicious pattern','There is a lot of 7 here.'],s2c:['leave a trace','Leave a little proof you were here.'],s2:['before 18','Before 18, he already had —'],s3:['the skill tree','Skill Tree.'],sGaming:['player profile','Player Profile.'],s4:['in equations','Described in equations.'],s8:['the dossier','Subject Dossier.'],s9:['the target','Forbes Before 25.'],s10:['the road ahead','The road ahead.'],s12:['officially certified','Certificate of Potential.'],s13:['the responsibility list','What 18 actually asks for.'],sVote:['your verdict','Should he count as an adult?'],sScratch:['on the house','One scratch card, just for you.'],s14:['the vault','Something only you can open.'],sbot:['one last test','Prove you are human.'],sBotHuman:['human mode','Fine — a real human check.'],sRoute:['the way home','The route back to you.'],s14r:['your reply','Write something back.'],sChildhood:['the origin story','Where it all started.'],sAI:['ask ch(gpt)','Ask ch(gpt).'],sLetters:['letters for later','Open one when you need it.'],s15:['the ending','Thanks for staying till the end.']};
 function replayTitleForSlide(slide){
+  const nice=REPLAY_NAMES[slide.id];
+  if(nice) return {label:nice[0],title:nice[1]};
   const label=replayCleanText(slide.querySelector('.label,.gift-kicker,.gift-title,.pw-hint,.section-kicker')) || slide.id;
   const title=replayCleanText(slide.querySelector('h1,h2,h3,.h2,.gift-title,.section-title,.vault-wrap .h2')) || replayCleanText(slide.querySelector('p,.shimmer-line,.sub'));
   return {label,title:title||label};
@@ -7138,7 +7141,7 @@ function toggleNeechContent(){
 }
 
 </script>
-<script async="" data-app-host="app.netlify.com" data-netlify-site-id="32c174e3-dbda-4bc3-8f42-dbfaa7fc9031" data-nf-variant="public" src="./A Random Site ✦_files/hud"></script>
+
 <script>
 window.addEventListener('load',()=>{if(window.__requestedReplayMode && typeof window.startReplayMode==='function') window.startReplayMode();});
 </script>

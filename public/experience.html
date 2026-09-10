@@ -6258,7 +6258,7 @@ function unlockCreatorMode(){
   const input=document.getElementById('creatorPassword');
   const fb=document.getElementById('creatorFeedback');
   if((input?.value||'')!==CREATOR_MODE_PASSWORD){
-    if(fb){fb.textContent='That password didn't match — try once more';fb.className='creator-feedback err';}
+    if(fb){fb.textContent='That password did not match — try once more';fb.className='creator-feedback err';}
     return;
   }
   creatorMode=true;

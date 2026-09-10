@@ -2126,7 +2126,7 @@ body.replay-mode #replayThumbs{
   window.unlockSiteGate=function(){
     if(input1.value===REPLAY_GATE_PASSWORD){
       window.__requestedReplayMode=true;
-      if(fb){fb.textContent='You're in — welcome back to the replay.';fb.style.color='var(--green)';}
+      if(fb){fb.textContent='Welcome back — the replay is all yours.';fb.style.color='var(--green)';}
       input1.value='';
       gate.style.transition='opacity .35s ease';
       gate.style.opacity='0';
@@ -2134,7 +2134,7 @@ body.replay-mode #replayThumbs{
       return;
     }
     if(input1.value!==SITE_GATE_PASSWORD){
-      if(fb){fb.textContent='Hmm, that's not it — want to try again?';fb.style.color='var(--red)';}
+      if(fb){fb.textContent='Hmm, that one did not match — want to try again?';fb.style.color='var(--red)';}
       input1.value=''; input1.focus(); return;
     }
     window.__requestedReplayMode=false;
@@ -4548,7 +4548,7 @@ async function startCandleChallenge(){
     detectCandleFace();
     detectCandleBlow();
   }catch(e){
-    if(status)status.textContent=e?.name==='NotAllowedError'?'Looks like camera and mic access is off — no worries, it's optional. Denied. Use the backup button if you continue.':'Could not start the candle detector.';
+    if(status)status.textContent=e?.name==='NotAllowedError'?'Camera and mic access is off — totally fine, it is optional. Denied. Use the backup button if you continue.':'Could not start the candle detector.';
     if(fallback)fallback.style.display='inline-flex';
   }
 }

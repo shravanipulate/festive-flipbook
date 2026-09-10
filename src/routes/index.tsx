@@ -1,24 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const TITLE = "A Random Site ✦ — a birthday made just for you";
+const DESCRIPTION =
+  "A private 32-page birthday experience: letters, candles, games, secrets and a replay archive to watch it all again.";
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "preload", as: "document", href: "/experience.html" }],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
+    <main className="fixed inset-0 bg-background">
+      <h1 className="sr-only">A Random Site ✦ — a birthday made just for you</h1>
+      <iframe
+        src="/experience.html"
+        title="A Random Site — birthday experience"
+        className="h-full w-full border-0"
+        allow="camera; microphone; autoplay; fullscreen; clipboard-write; accelerometer; gyroscope"
+        allowFullScreen
       />
-    </div>
+    </main>
   );
 }

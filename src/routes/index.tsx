@@ -20,8 +20,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const injectUpgrade = (event: React.SyntheticEvent<HTMLIFrameElement>) => {
-    const frame = event.currentTarget;
+  const injectUpgrade = (event: any) => {
+    const frame = event.currentTarget as HTMLIFrameElement;
     try {
       const doc = frame.contentDocument;
       if (!doc || doc.getElementById("birthday-upgrade-script")) return;

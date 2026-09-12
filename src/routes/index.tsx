@@ -24,10 +24,10 @@ function Index() {
     const frame = event.currentTarget as HTMLIFrameElement;
     try {
       const doc = frame.contentDocument;
-      if (!doc || doc.getElementById("birthday-upgrade-script")) return;
+      if (!doc || doc.getElementById("birthday-upgrade-v2-script")) return;
       const script = doc.createElement("script");
-      script.id = "birthday-upgrade-script";
-      script.src = "/experience-upgrade-patch.js";
+      script.id = "birthday-upgrade-v2-script";
+      script.src = "/experience-upgrade-v2.js";
       script.async = false;
       doc.body.appendChild(script);
     } catch {
@@ -37,7 +37,7 @@ function Index() {
 
   return (
     <main className="fixed inset-0 bg-background">
-      <h1 className="sr-only">A Random Site ✦ — a birthday made just for you</h1>
+      <h1 className="sr-only">A Random Site ✦ — a birthday experience</h1>
       <iframe
         src="/experience.html"
         title="A Random Site — birthday experience"

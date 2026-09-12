@@ -20,6 +20,21 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const injectUpgrade = (event: React.SyntheticEvent<HTMLIFrameElement>) => {
+    const frame = event.currentTarget;
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || doc.getElementById("birthday-upgrade-script")) return;
+      const script = doc.createElement("script");
+      script.id = "birthday-upgrade-script";
+      script.src = "/experience-upgrade-patch.js";
+      script.async = false;
+      doc.body.appendChild(script);
+    } catch {
+      // Same-origin in production; keep the original experience intact if injection is unavailable.
+    }
+  };
+
   return (
     <main className="fixed inset-0 bg-background">
       <h1 className="sr-only">A Random Site ✦ — a birthday made just for you</h1>
@@ -27,6 +42,7 @@ function Index() {
         src="/experience.html"
         title="A Random Site — birthday experience"
         className="h-full w-full border-0"
+        onLoad={injectUpgrade}
         allow="camera; microphone; autoplay; fullscreen; clipboard-write; accelerometer; gyroscope"
         allowFullScreen
       />

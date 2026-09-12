@@ -2,17 +2,28 @@
   if (window.__birthdayUpgradeV2Loaded) return;
   window.__birthdayUpgradeV2Loaded = true;
 
+  // EXACTLY the languages requested — no Korean, French, Spanish, etc.
   const LANGS = [
-    ['Hindi','नमस्ते'], ['English','Hello'], ['Maithili','प्रणाम'],
-    ['Punjabi','ਸਤ ਸ੍ਰੀ ਅਕਾਲ'], ['German · 20%','Hallo'], ['Japanese','こんにちは'],
-    ['Sanskrit','नमः'], ['Assamese','নমস্কাৰ'], ['Bengali','নমস্কার'],
-    ['Odia','ନମସ୍କାର'], ['Bhojpuri','प्रणाम'], ['Tribal languages','Hello'],
-    ['Mandarin','你好']
+    ['Hindi', 'नमस्ते'],
+    ['English', 'Hello'],
+    ['Maithili', 'प्रणाम'],
+    ['Punjabi', 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ'],
+    ['German · 20%', 'Hallo'],
+    ['Japanese', 'こんにちは'],
+    ['Sanskrit', 'नमः'],
+    ['Assamese', 'নমস্কাৰ'],
+    ['Bengali', 'নমস্কার'],
+    ['Odia', 'ନମସ୍କାର'],
+    ['Bhojpuri', 'प्रणाम'],
+    ['Tribal languages', 'Hello'],
+    ['Mandarin', '你好']
   ];
+
+  const ALLOWED_HELLOS = new Set(LANGS.map(([, hello]) => hello));
 
   const style = document.createElement('style');
   style.textContent = `
-    #bu-language-stream{position:fixed;inset:0;z-index:12;pointer-events:none;overflow:hidden;display:none;opacity:.78;mask-image:linear-gradient(to bottom,transparent 0%,black 13%,black 87%,transparent 100%)}
+    #bu-language-stream{position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden;display:none;opacity:.78;mask-image:linear-gradient(to bottom,transparent 0%,black 13%,black 87%,transparent 100%)}
     #bu-language-stream.show{display:block}
     .bu-stream-col{position:absolute;top:-25vh;display:flex;flex-direction:column;gap:22px;white-space:nowrap;animation:buStream linear infinite}
     .bu-stream-word{font-size:clamp(13px,1.5vw,20px);letter-spacing:.08em;opacity:.32;font-weight:600}
@@ -25,7 +36,7 @@
   `;
   document.head.appendChild(style);
 
-  // Replace the old random-language visual with only the requested set.
+  // Our replacement stream.
   const stream = document.createElement('div');
   stream.id = 'bu-language-stream';
   const shuffled = [...LANGS, ...LANGS.slice(0, 6)];
@@ -47,15 +58,47 @@
   }
   document.body.appendChild(stream);
 
-  // Only show the requested language stream on the opening page.
   let opening = true;
   const setOpening = (on) => {
     opening = !!on;
     stream.classList.toggle('show', opening);
   };
-  setOpening(true);
 
-  // If the original experience exposes nextSlide, stop the stream as soon as it advances.
+  // HARD-SUPPRESS the legacy random greeting animation on page 1.
+  // The old experience contains greetings such as Bonjour/Hola/Korean, so hide
+  // only elements that actually contain non-requested greeting text. This leaves
+  // the rest of the page untouched.
+  const unwantedGreeting = /(?:bonjour|hola|안녕|你好|ciao|salut|привет|olá|ola|hallo|hello|नमस्ते|प्रणाम|ਸਤ ਸ੍ਰੀ ਅਕਾਲ|こんにちは|नमः|নমস্কাৰ|নমস্কার|ନମସ୍କାର)/i;
+  const allowedGreeting = (text) => ALLOWED_HELLOS.has((text || '').trim());
+  const hideLegacyRandomGreetings = () => {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    nodes.forEach((node) => {
+      const text = (node.nodeValue || '').trim();
+      if (!text || allowedGreeting(text)) return;
+
+      // These are the clearly identifiable greetings visible in the old stream.
+      if (/\b(?:Bonjour|Hola|Ciao|Salut|Привет|Ol[áa])\b|안녕/.test(text)) {
+        const parent = node.parentElement;
+        if (parent && !parent.closest('#bu-language-stream')) {
+          parent.style.visibility = 'hidden';
+          parent.style.opacity = '0';
+        }
+      }
+    });
+  };
+
+  setOpening(true);
+  hideLegacyRandomGreetings();
+  new MutationObserver(hideLegacyRandomGreetings).observe(document.body, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
+
+  // Stop the language stream after leaving the opening page.
   const originalNext = window.nextSlide;
   if (typeof originalNext === 'function') {
     window.nextSlide = function(...args) {
@@ -64,7 +107,6 @@
     };
   }
 
-  // Also react to common page/slide visibility changes without touching the legacy HTML.
   const observer = new MutationObserver(() => {
     const active = document.querySelector('.slide.active, .page.active, [data-slide].active, [aria-current="true"]');
     if (active) {
@@ -74,28 +116,30 @@
   });
   observer.observe(document.body, {subtree:true, attributes:true, attributeFilter:['class','style','aria-current']});
 
-  // Remove any accidental Shandilya text introduced by the previous upgrade layer.
+  // Remove the surname everywhere it appears as visible text.
   const cleanShandilya = () => {
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(n => {
-      if (/shandilya/i.test(n.nodeValue || '')) n.nodeValue = n.nodeValue.replace(/\s*shandilya\s*/gi, ' ');
+      if (/shandilya/i.test(n.nodeValue || '')) {
+        n.nodeValue = n.nodeValue.replace(/\s*shandilya\s*/gi, ' ');
+      }
     });
   };
   cleanShandilya();
   new MutationObserver(cleanShandilya).observe(document.body, {subtree:true, childList:true, characterData:true});
 
-  // Make the reveal say only CHINMAY, with cleaner spacing and a more deliberate entrance.
+  // Reveal only CHINMAY, with clean letter-by-letter spacing.
   const name = document.getElementById('bu-name');
   if (name) {
     const old = name.textContent || '';
     if (/chinmay/i.test(old) || /shandilya/i.test(old)) name.textContent = 'CHINMAY';
   }
+
   const oldReveal = window.__birthdayNameReveal;
   if (typeof oldReveal === 'function') window.__birthdayNameReveal = null;
 
-  // Patch the existing reveal if the previous layer's button is present.
   const step = document.getElementById('bu-step');
   const overlay = document.getElementById('birthday-upgrade-overlay');
   if (step && overlay) {

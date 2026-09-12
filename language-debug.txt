@@ -1,0 +1,165 @@
+--- 10+ LANGUAGES occurrence 1 ---
+button></div>
+</header>
+<div id="siteGateCard">
+  <section class="gate-editorial">
+    <div class="gate-kicker"><span>AN EXPERIMENT IN 32 PARTS</span><span>ISSUE 01</span></div>
+    <h1>Can you review<br/>this <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS
+
+--- Hello occurrence 1 ---
+ass="gate-editorial">
+    <div class="gate-kicker"><span>AN EXPERIMENT IN 32 PARTS</span><span>ISSUE 01</span></div>
+    <h1>Can you review<br/>this <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span><
+
+--- नमस्ते occurrence 1 ---
+l">
+    <div class="gate-kicker"><span>AN EXPERIMENT IN 32 PARTS</span><span>ISSUE 01</span></div>
+    <h1>Can you review<br/>this <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span></div>
+    <div cla
+
+--- নমস্কার occurrence 1 ---
+"gate-kicker"><span>AN EXPERIMENT IN 32 PARTS</span><span>ISSUE 01</span></div>
+    <h1>Can you review<br/>this <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span></div>
+    <div class="gate-symbol" ar
+
+--- こんにちは occurrence 1 ---
+>ISSUE 01</span></div>
+    <h1>Can you review<br/>this <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span></div>
+    <div class="gate-symbol" aria-hidden="true"><span>✦</span></div>
+    <div class="gat
+
+--- مرحبا occurrence 1 ---
+n you review<br/>this <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span></div>
+    <div class="gate-symbol" aria-hidden="true"><span>✦</span></div>
+    <div class="gate-copy">
+      <h2>Enter the prev
+
+--- Olá occurrence 1 ---
+his <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span></div>
+    <div class="gate-symbol" aria-hidden="true"><span>✦</span></div>
+    <div class="gate-copy">
+      <h2>Enter the preview</h2>
+      <di
+
+--- Bonjour occurrence 1 ---
+AN EXPERIMENT IN 32 PARTS</span><span>ISSUE 01</span></div>
+    <h1>Can you review<br/>this <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span></div>
+    <div class="gate-symbol" aria-hidden="true"><sp
+
+--- Hola occurrence 1 ---
+PARTS</span><span>ISSUE 01</span></div>
+    <h1>Can you review<br/>this <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span></div>
+    <div class="gate-symbol" aria-hidden="true"><span>✦</span></div>
+  
+
+--- 안녕 occurrence 1 ---
+div>
+    <h1>Can you review<br/>this <em>random site?</em></h1>
+    <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span></div>
+    <div class="gate-symbol" aria-hidden="true"><span>✦</span></div>
+    <div class="gate-copy">
+      <h2
+
+--- नमस्कार occurrence 1 ---
+  <p class="gate-deck">I made something a little unusual. Open it, click around, and tell me if it’s actually good.</p>
+    <div class="gate-language-strip" aria-label="A multilingual experience with more than ten languages">
+      <span class="gate-lang-lead">10+ LANGUAGES</span>
+      <div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>
+    </div>
+    <div class="gate-footnote"><span>DESIGNED TO BE EXPLORED</span><span>LIGHT / DARK</span><span>ONE FILE</span></div>
+  </section>
+  <section class="gate-access">
+    <div class="gate-access-top"><span class="gate-index">ACCESS / 01</span><span class="gate-secure">PRIVATE PREVIEW</span></div>
+    <div class="gate-symbol" aria-hidden="true"><span>✦</span></div>
+    <div class="gate-copy">
+      <h2>Enter the preview</h2>
+      <div id="siteGatePrompt">Use the pas

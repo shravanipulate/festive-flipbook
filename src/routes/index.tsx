@@ -29,6 +29,14 @@ function Index() {
       script.id = "birthday-upgrade-v2-script";
       script.src = "/experience-upgrade-v2.js";
       script.async = false;
+      script.onload = () => {
+        if (doc.getElementById("birthday-upgrade-v3-script")) return;
+        const fix = doc.createElement("script");
+        fix.id = "birthday-upgrade-v3-script";
+        fix.src = "/experience-upgrade-v3.js";
+        fix.async = false;
+        doc.body.appendChild(fix);
+      };
       doc.body.appendChild(script);
     } catch {
       // Same-origin in production; keep the original experience intact if injection is unavailable.

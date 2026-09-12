@@ -2,7 +2,7 @@
   if (window.__birthdayUpgradeV2Loaded) return;
   window.__birthdayUpgradeV2Loaded = true;
 
-  // EXACTLY the languages requested — no Korean, French, Spanish, etc.
+  // ONLY the languages requested by Shravani.
   const LANGS = [
     ['Hindi', 'नमस्ते'],
     ['English', 'Hello'],
@@ -19,89 +19,108 @@
     ['Mandarin', '你好']
   ];
 
-  const ALLOWED_HELLOS = new Set(LANGS.map(([, hello]) => hello));
+  // Remove the previous continuous language-rain layer completely.
+  document.getElementById('bu-language-stream')?.remove();
 
   const style = document.createElement('style');
   style.textContent = `
-    #bu-language-stream{position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden;display:none;opacity:.78;mask-image:linear-gradient(to bottom,transparent 0%,black 13%,black 87%,transparent 100%)}
-    #bu-language-stream.show{display:block}
-    .bu-stream-col{position:absolute;top:-25vh;display:flex;flex-direction:column;gap:22px;white-space:nowrap;animation:buStream linear infinite}
-    .bu-stream-word{font-size:clamp(13px,1.5vw,20px);letter-spacing:.08em;opacity:.32;font-weight:600}
-    .bu-stream-word:nth-child(3n){opacity:.18;font-size:.85em}
-    .bu-stream-word:nth-child(4n){opacity:.45}
-    @keyframes buStream{from{transform:translateY(-10vh)}to{transform:translateY(125vh)}}
-    #birthday-upgrade-overlay .bu-name{font-size:clamp(42px,10vw,118px);letter-spacing:.12em}
-    #birthday-upgrade-overlay .bu-name span{display:inline-block;will-change:transform,opacity,filter}
-    #birthday-upgrade-overlay .bu-name .bu-name-space{width:.34em}
+    #bu-language-message {
+      position: fixed;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      width: min(92vw, 900px);
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 900ms ease, transform 900ms cubic-bezier(.16,1,.3,1);
+    }
+    #bu-language-message.show { opacity: 1; }
+    #bu-language-message .bu-multi-line {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: baseline;
+      gap: .08em .28em;
+      line-height: 1.45;
+    }
+    #bu-language-message .bu-word {
+      display: inline-block;
+      font-size: clamp(18px, 3vw, 34px);
+      font-weight: 600;
+      letter-spacing: .015em;
+      opacity: .92;
+    }
+    #bu-language-message .bu-word:nth-child(3n) { opacity: .72; }
+    #bu-language-message .bu-word:nth-child(4n) { font-style: italic; }
+    #bu-language-message .bu-label {
+      margin-top: 18px;
+      font-size: 11px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      opacity: .42;
+    }
+    #birthday-upgrade-overlay .bu-name {
+      font-size: clamp(42px, 10vw, 118px);
+      letter-spacing: .12em;
+    }
+    #birthday-upgrade-overlay .bu-name span {
+      display: inline-block;
+      will-change: transform, opacity, filter;
+    }
   `;
   document.head.appendChild(style);
 
-  // Our replacement stream.
-  const stream = document.createElement('div');
-  stream.id = 'bu-language-stream';
-  const shuffled = [...LANGS, ...LANGS.slice(0, 6)];
-  for (let c = 0; c < 10; c++) {
-    const col = document.createElement('div');
-    col.className = 'bu-stream-col';
-    col.style.left = `${c * 10 + 2 + (c % 2) * 2}%`;
-    col.style.animationDuration = `${13 + (c % 5) * 2}s`;
-    col.style.animationDelay = `${-(c * 1.7)}s`;
-    for (let i = 0; i < 7; i++) {
-      const [name, hello] = shuffled[(i + c * 2) % shuffled.length];
-      const word = document.createElement('span');
-      word.className = 'bu-stream-word';
-      word.textContent = hello;
-      word.title = name;
-      col.appendChild(word);
-    }
-    stream.appendChild(col);
-  }
-  document.body.appendChild(stream);
+  // Replace the old opening language text with ONE calm, static multilingual line.
+  // No continuous scrolling/rain animation.
+  const message = document.createElement('div');
+  message.id = 'bu-language-message';
 
-  let opening = true;
-  const setOpening = (on) => {
-    opening = !!on;
-    stream.classList.toggle('show', opening);
-  };
+  const line = document.createElement('div');
+  line.className = 'bu-multi-line';
 
-  // HARD-SUPPRESS the legacy random greeting animation on page 1.
-  // The old experience contains greetings such as Bonjour/Hola/Korean, so hide
-  // only elements that actually contain non-requested greeting text. This leaves
-  // the rest of the page untouched.
-  const unwantedGreeting = /(?:bonjour|hola|안녕|你好|ciao|salut|привет|olá|ola|hallo|hello|नमस्ते|प्रणाम|ਸਤ ਸ੍ਰੀ ਅਕਾਲ|こんにちは|नमः|নমস্কাৰ|নমস্কার|ନମସ୍କାର)/i;
-  const allowedGreeting = (text) => ALLOWED_HELLOS.has((text || '').trim());
-  const hideLegacyRandomGreetings = () => {
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
+  // A natural birthday greeting assembled from the requested languages only.
+  const words = [
+    'नमस्ते',       // Hindi — Hello
+    'Hello',        // English — Hello
+    'प्रणाम',       // Maithili — Hello
+    'ਸਤ ਸ੍ਰੀ ਅਕਾਲ', // Punjabi — Hello
+    'Hallo',        // German — Hello
+    'こんにちは',    // Japanese — Hello
+    'नमः',          // Sanskrit — Greetings
+    'নমস্কাৰ',       // Assamese — Hello
+    'নমস্কার',       // Bengali — Hello
+    'ନମସ୍କାର',      // Odia — Hello
+    'प्रणाम',        // Bhojpuri — Hello
+    'Hello',        // Tribal languages — Hello
+    '你好'           // Mandarin — Hello
+  ];
 
-    nodes.forEach((node) => {
-      const text = (node.nodeValue || '').trim();
-      if (!text || allowedGreeting(text)) return;
-
-      // These are the clearly identifiable greetings visible in the old stream.
-      if (/\b(?:Bonjour|Hola|Ciao|Salut|Привет|Ol[áa])\b|안녕/.test(text)) {
-        const parent = node.parentElement;
-        if (parent && !parent.closest('#bu-language-stream')) {
-          parent.style.visibility = 'hidden';
-          parent.style.opacity = '0';
-        }
-      }
-    });
-  };
-
-  setOpening(true);
-  hideLegacyRandomGreetings();
-  new MutationObserver(hideLegacyRandomGreetings).observe(document.body, {
-    subtree: true,
-    childList: true,
-    characterData: true
+  words.forEach((word) => {
+    const span = document.createElement('span');
+    span.className = 'bu-word';
+    span.textContent = word;
+    line.appendChild(span);
   });
 
-  // Stop the language stream after leaving the opening page.
+  const label = document.createElement('div');
+  label.className = 'bu-label';
+  label.textContent = '13+ languages · one birthday';
+
+  message.append(line, label);
+  document.body.appendChild(message);
+
+  // Show it only on the opening page, like the original static language text.
+  const setOpening = (on) => {
+    message.classList.toggle('show', !!on);
+  };
+  setOpening(true);
+
+  // Stop showing the replacement once the experience moves forward.
   const originalNext = window.nextSlide;
   if (typeof originalNext === 'function') {
-    window.nextSlide = function(...args) {
+    window.nextSlide = function (...args) {
       setOpening(false);
       return originalNext.apply(this, args);
     };
@@ -114,7 +133,36 @@
       if (all.length && all.indexOf(active) > 0) setOpening(false);
     }
   });
-  observer.observe(document.body, {subtree:true, attributes:true, attributeFilter:['class','style','aria-current']});
+  observer.observe(document.body, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class', 'style', 'aria-current']
+  });
+
+  // Hide only the OLD random greeting elements, leaving the original page intact.
+  const hideLegacyRandomGreetings = () => {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    nodes.forEach((node) => {
+      const text = (node.nodeValue || '').trim();
+      if (!text || node.parentElement?.closest('#bu-language-message')) return;
+      if (/\b(?:Bonjour|Hola|Ciao|Salut|Привет|Ol[áa])\b|안녕/.test(text)) {
+        const parent = node.parentElement;
+        if (parent) {
+          parent.style.visibility = 'hidden';
+          parent.style.opacity = '0';
+        }
+      }
+    });
+  };
+  hideLegacyRandomGreetings();
+  new MutationObserver(hideLegacyRandomGreetings).observe(document.body, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
 
   // Remove the surname everywhere it appears as visible text.
   const cleanShandilya = () => {
@@ -128,9 +176,13 @@
     });
   };
   cleanShandilya();
-  new MutationObserver(cleanShandilya).observe(document.body, {subtree:true, childList:true, characterData:true});
+  new MutationObserver(cleanShandilya).observe(document.body, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
 
-  // Reveal only CHINMAY, with clean letter-by-letter spacing.
+  // Reveal only CHINMAY.
   const name = document.getElementById('bu-name');
   if (name) {
     const old = name.textContent || '';
@@ -143,7 +195,7 @@
   const step = document.getElementById('bu-step');
   const overlay = document.getElementById('birthday-upgrade-overlay');
   if (step && overlay) {
-    const revealOnlyChinmay = () => {
+    step.onclick = () => {
       overlay.classList.add('show');
       setOpening(false);
       const el = document.getElementById('bu-name');
@@ -164,6 +216,5 @@
         }, i * 110);
       });
     };
-    step.onclick = revealOnlyChinmay;
   }
 })();

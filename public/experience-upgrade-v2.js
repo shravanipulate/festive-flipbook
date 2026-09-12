@@ -2,76 +2,119 @@
   if (window.__birthdayUpgradeV2Loaded) return;
   window.__birthdayUpgradeV2Loaded = true;
 
-  // Only replace the existing opening language text. Nothing new is added.
-  const replacement = [
-    'नमस्ते',       // Hindi
-    'Hello',        // English
-    'प्रणाम',       // Maithili
-    'ਸਤ ਸ੍ਰੀ ਅਕਾਲ', // Punjabi
-    'Hallo',        // German
-    'こんにちは',    // Japanese
-    'नमः',          // Sanskrit
-    'নমস্কাৰ',       // Assamese
-    'নমস্কার',       // Bengali
-    'ନମସ୍କାର',      // Odia
-    'प्रणाम',        // Bhojpuri
-    'Hello',        // Tribal languages
-    '你好'           // Mandarin
-  ].join('');
-
-  const oldTokens = [
-    'Bonjour', 'Hola', 'Ciao', 'Salut', 'Привет', 'Olá', '안녕', 'مرحبا',
-    'नमस्कार', 'নমস্কার', 'নমস্কাৰ', 'こんにちは', 'नमस्ते', 'Hello'
+  const LANGS = [
+    ['Hindi','नमस्ते'], ['English','Hello'], ['Maithili','प्रणाम'],
+    ['Punjabi','ਸਤ ਸ੍ਰੀ ਅਕਾਲ'], ['German · 20%','Hallo'], ['Japanese','こんにちは'],
+    ['Sanskrit','नमः'], ['Assamese','নমস্কাৰ'], ['Bengali','নমস্কার'],
+    ['Odia','ନମସ୍କାର'], ['Bhojpuri','प्रणाम'], ['Tribal languages','Hello'],
+    ['Mandarin','你好']
   ];
 
-  const replaceExistingLanguageLine = () => {
+  const style = document.createElement('style');
+  style.textContent = `
+    #bu-language-stream{position:fixed;inset:0;z-index:12;pointer-events:none;overflow:hidden;display:none;opacity:.78;mask-image:linear-gradient(to bottom,transparent 0%,black 13%,black 87%,transparent 100%)}
+    #bu-language-stream.show{display:block}
+    .bu-stream-col{position:absolute;top:-25vh;display:flex;flex-direction:column;gap:22px;white-space:nowrap;animation:buStream linear infinite}
+    .bu-stream-word{font-size:clamp(13px,1.5vw,20px);letter-spacing:.08em;opacity:.32;font-weight:600}
+    .bu-stream-word:nth-child(3n){opacity:.18;font-size:.85em}
+    .bu-stream-word:nth-child(4n){opacity:.45}
+    @keyframes buStream{from{transform:translateY(-10vh)}to{transform:translateY(125vh)}}
+    #birthday-upgrade-overlay .bu-name{font-size:clamp(42px,10vw,118px);letter-spacing:.12em}
+    #birthday-upgrade-overlay .bu-name span{display:inline-block;will-change:transform,opacity,filter}
+    #birthday-upgrade-overlay .bu-name .bu-name-space{width:.34em}
+  `;
+  document.head.appendChild(style);
+
+  // Keep the original flowing format; only use the requested languages.
+  const stream = document.createElement('div');
+  stream.id = 'bu-language-stream';
+  const shuffled = [...LANGS, ...LANGS.slice(0, 6)];
+  for (let c = 0; c < 10; c++) {
+    const col = document.createElement('div');
+    col.className = 'bu-stream-col';
+    col.style.left = `${c * 10 + 2 + (c % 2) * 2}%`;
+    col.style.animationDuration = `${13 + (c % 5) * 2}s`;
+    col.style.animationDelay = `${-(c * 1.7)}s`;
+    for (let i = 0; i < 7; i++) {
+      const [name, hello] = shuffled[(i + c * 2) % shuffled.length];
+      const word = document.createElement('span');
+      word.className = 'bu-stream-word';
+      word.textContent = hello;
+      word.title = name;
+      col.appendChild(word);
+    }
+    stream.appendChild(col);
+  }
+  document.body.appendChild(stream);
+
+  // Only show the requested language stream on the opening page.
+  let opening = true;
+  const setOpening = (on) => {
+    opening = !!on;
+    stream.classList.toggle('show', opening);
+  };
+  setOpening(true);
+
+  const originalNext = window.nextSlide;
+  if (typeof originalNext === 'function') {
+    window.nextSlide = function(...args) {
+      setOpening(false);
+      return originalNext.apply(this, args);
+    };
+  }
+
+  const observer = new MutationObserver(() => {
+    const active = document.querySelector('.slide.active, .page.active, [data-slide].active, [aria-current="true"]');
+    if (active) {
+      const all = [...document.querySelectorAll('.slide, .page, [data-slide]')];
+      if (all.length && all.indexOf(active) > 0) setOpening(false);
+    }
+  });
+  observer.observe(document.body, {subtree:true, attributes:true, attributeFilter:['class','style','aria-current']});
+
+  const cleanShandilya = () => {
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
-
-    // Prefer the actual existing language line: a text node containing several
-    // greeting tokens. Replace that node only, preserving its original element,
-    // position, CSS, animation and surrounding page exactly as-is.
-    for (const node of nodes) {
-      const text = node.nodeValue || '';
-      if (!text.trim()) continue;
-      const hits = oldTokens.reduce((n, token) => n + (text.includes(token) ? 1 : 0), 0);
-      if (hits >= 2) {
-        node.nodeValue = replacement;
-        return true;
-      }
-    }
-
-    // If the original line is split into spans/text nodes, replace only the
-    // smallest parent containing multiple old-language greetings.
-    const elements = [...document.body.querySelectorAll('*')];
-    for (const el of elements) {
-      if (el.id === 'birthday-upgrade-v2-script') continue;
-      const text = el.textContent || '';
-      const hits = oldTokens.reduce((n, token) => n + (text.includes(token) ? 1 : 0), 0);
-      if (hits >= 3 && text.length < 300) {
-        const directTextNodes = [];
-        const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-        while (tw.nextNode()) directTextNodes.push(tw.currentNode);
-        const languageNodes = directTextNodes.filter(n =>
-          oldTokens.some(token => (n.nodeValue || '').includes(token))
-        );
-        if (languageNodes.length >= 2) {
-          el.textContent = replacement;
-          return true;
-        }
-      }
-    }
-
-    return false;
+    nodes.forEach(n => {
+      if (/shandilya/i.test(n.nodeValue || '')) n.nodeValue = n.nodeValue.replace(/\s*shandilya\s*/gi, ' ');
+    });
   };
+  cleanShandilya();
+  new MutationObserver(cleanShandilya).observe(document.body, {subtree:true, childList:true, characterData:true});
 
-  replaceExistingLanguageLine();
+  const name = document.getElementById('bu-name');
+  if (name) {
+    const old = name.textContent || '';
+    if (/chinmay/i.test(old) || /shandilya/i.test(old)) name.textContent = 'CHINMAY';
+  }
+  const oldReveal = window.__birthdayNameReveal;
+  if (typeof oldReveal === 'function') window.__birthdayNameReveal = null;
 
-  // The original page can render the line after load, so retry briefly without
-  // creating any replacement element or changing any other content.
-  let tries = 0;
-  const timer = setInterval(() => {
-    if (replaceExistingLanguageLine() || ++tries > 20) clearInterval(timer);
-  }, 250);
+  const step = document.getElementById('bu-step');
+  const overlay = document.getElementById('birthday-upgrade-overlay');
+  if (step && overlay) {
+    const revealOnlyChinmay = () => {
+      overlay.classList.add('show');
+      setOpening(false);
+      const el = document.getElementById('bu-name');
+      if (!el) return;
+      el.textContent = '';
+      [...'CHINMAY'].forEach((ch, i) => {
+        const s = document.createElement('span');
+        s.textContent = ch;
+        s.style.opacity = '0';
+        s.style.transform = 'translateY(28px) rotateX(70deg) scale(.65)';
+        s.style.filter = 'blur(7px)';
+        s.style.transition = '900ms cubic-bezier(.16,1,.3,1)';
+        el.appendChild(s);
+        setTimeout(() => {
+          s.style.opacity = '1';
+          s.style.transform = 'translateY(0) rotateX(0) scale(1)';
+          s.style.filter = 'blur(0)';
+        }, i * 110);
+      });
+    };
+    step.onclick = revealOnlyChinmay;
+  }
 })();

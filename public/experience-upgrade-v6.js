@@ -4,16 +4,36 @@
 
   const isHome = () => /enter the archive/i.test(document.body?.innerText || "");
 
-  // Force the opening copy to use only the first name.
+  // Opening must say ONLY CHINMAY. Remove the full name wherever it exists in DOM text.
   const cleanName = () => {
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach((node) => {
       const s = node.nodeValue || "";
-      const fixed = s.replace(/\bChinmay\s+Shandilya\b/gi, "Chinmay");
+      const fixed = s
+        .replace(/\bChinmay\s+Shandilya\b/gi, "Chinmay")
+        .replace(/\bChinmay\s*[-–—|•·]\s*Shandilya\b/gi, "Chinmay");
       if (fixed !== s) node.nodeValue = fixed;
     });
+
+    // Also hide an exact-name element if the original experience wraps the name.
+    document.querySelectorAll("body *").forEach((el) => {
+      const text = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (/^Chinmay\s+Shandilya$/i.test(text)) {
+        el.style.setProperty("display", "none", "important");
+      }
+    });
+  };
+
+  // Hide the Lovable badge if Lovable injected it into the experience document.
+  const hideLovableBadge = () => {
+    if (!document.getElementById("birthday-hide-lovable-badge")) {
+      const style = document.createElement("style");
+      style.id = "birthday-hide-lovable-badge";
+      style.textContent = `#lovable-badge{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}`;
+      document.head.appendChild(style);
+    }
   };
 
   let canvas, ctx, raf = 0, started = 0, lastW = 0, lastH = 0;
@@ -57,7 +77,7 @@
         if (d[(y * off.width + x) * 4 + 3] > 80) out.push({ x, y });
       }
     }
-    const max = 1400;
+    const max = 1600;
     if (out.length <= max) return out;
     const result = [];
     const stride = out.length / max;
@@ -76,10 +96,12 @@
       y: Math.random() * h,
       tx: t.x,
       ty: t.y,
-      seed: Math.random() * Math.PI * 2
+      seed: Math.random() * Math.PI * 2,
+      radius: 0.9 + Math.random() * 1.2
     }));
     started = performance.now();
     cancelAnimationFrame(raf);
+
     const draw = (now) => {
       if (!canvas?.isConnected || !isHome()) {
         ctx?.clearRect(0, 0, innerWidth, innerHeight);
@@ -90,27 +112,30 @@
       const cycle = t % 8;
       ctx.clearRect(0, 0, innerWidth, innerHeight);
 
-      // 0–2.6s: scattered particles rush inward and form CHINMAY.
-      // 2.6–5.5s: hold the word.
-      // 5.5–8s: disperse, then repeat.
-      const gather = Math.min(1, Math.max(0, (cycle - 0.15) / 2.45));
-      const ease = gather * gather * (3 - 2 * gather);
-      const scattering = cycle >= 5.5 ? Math.min(1, (cycle - 5.5) / 2.5) : 0;
-      const hold = cycle >= 2.6 && cycle < 5.5;
+      // 0–2.4s gather -> CHINMAY, 2.4–5.4s hold, 5.4–8s disperse.
+      const rawGather = Math.min(1, Math.max(0, (cycle - 0.05) / 2.35));
+      const ease = rawGather * rawGather * (3 - 2 * rawGather);
+      const scattering = cycle >= 5.4 ? Math.min(1, (cycle - 5.4) / 2.6) : 0;
+      const hold = cycle >= 2.4 && cycle < 5.4;
 
       for (const p of pts) {
         let tx = p.tx, ty = p.ty;
         if (scattering) {
           const a = p.seed + p.tx * 0.015;
-          tx += Math.cos(a) * (30 + 260 * scattering);
-          ty += Math.sin(a) * (30 + 180 * scattering);
+          tx += Math.cos(a) * (60 + 700 * scattering);
+          ty += Math.sin(a) * (45 + 450 * scattering);
         }
-        const speed = hold ? 0.11 : 0.025 + ease * 0.10;
+
+        // Strong spring so the word actually forms on screen, then breaks apart visibly.
+        const speed = scattering ? 0.20 : hold ? 0.28 : 0.18 + ease * 0.12;
         p.x += (tx - p.x) * speed;
         p.y += (ty - p.y) * speed;
-        ctx.globalAlpha = hold ? 0.88 : Math.max(0.15, 0.82 - scattering * 0.55);
+
+        ctx.globalAlpha = scattering
+          ? Math.max(0, 0.90 - scattering * 0.95)
+          : hold ? 0.95 : 0.82;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.35, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
@@ -121,16 +146,21 @@
 
   const boot = () => {
     cleanName();
+    hideLovableBadge();
     if (isHome()) init();
   };
 
   boot();
-  setTimeout(boot, 300);
-  setTimeout(boot, 1000);
+  setTimeout(boot, 150);
+  setTimeout(boot, 500);
+  setTimeout(boot, 1200);
+
   new MutationObserver(() => {
     cleanName();
+    hideLovableBadge();
     if (isHome() && !canvas?.isConnected) init();
   }).observe(document.body, { subtree: true, childList: true, characterData: true });
+
   addEventListener("resize", () => {
     if (isHome()) init();
   });

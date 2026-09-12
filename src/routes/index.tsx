@@ -69,6 +69,7 @@ function Index() {
 
   return (
     <main className="fixed inset-0 bg-background">
+      <style>{`#lovable-badge{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}`}</style>
       <h1 className="sr-only">A Random Site ✦ — a birthday experience</h1>
       <iframe
         src="/experience.html"

@@ -1,0 +1,37 @@
+name: Apply exact language replacement
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Replace spans only
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('public/experience.html')
+          s = p.read_text(encoding='utf-8')
+          old = '<div class="gate-lang-flow"><span>Hello</span><span>नमस्ते</span><span>নমস্কার</span><span>Bonjour</span><span>Hola</span><span>こんにちは</span><span>안녕</span><span>مرحبا</span><span>Olá</span><span>Ciao</span><span>नमस्कार</span></div>'
+          new = '<div class="gate-lang-flow"><span>नमस्ते</span><span>Hello</span><span>प्रणाम</span><span>ਸਤ ਸ੍ਰੀ ਅਕਾਲ</span><span>Hallo</span><span>こんにちは</span><span>नमः</span><span>নমস্কাৰ</span><span>নমস্কার</span><span>ନମସ୍କାର</span><span>प्रणाम</span><span>Hello</span><span>你好</span></div>'
+          if old not in s:
+              raise SystemExit('Exact original gate-lang-flow markup not found; no HTML changed.')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+      - name: Commit HTML and cleanup
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/experience.html
+          git rm .github/workflows/apply-language-fix.yml language-debug.txt 2>/dev/null || true
+          git commit -m 'Replace opening language greetings without changing animation'
+          git push

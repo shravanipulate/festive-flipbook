@@ -132,7 +132,7 @@ function Index() {
         title="A Random Site — birthday experience"
         className="h-full w-full border-0"
         onLoad={injectUpgrade}
-        allow="camera; microphone; autoplay; fullscreen; clipboard-write; accelerometer; gyroscope"
+        allow="camera; microphone; display-capture; autoplay; fullscreen; clipboard-write; accelerometer; gyroscope"
         allowFullScreen
       />
     </main>

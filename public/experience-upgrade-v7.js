@@ -2,8 +2,8 @@
   if (window.__birthdayUpgradeV7Loaded) return;
   window.__birthdayUpgradeV7Loaded = true;
 
-  const PI_DIGITS = '1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679';
-  const PI_TAIL = '487256';
+  // Plenty of π digits so there is no 100-digit stopping point in the UI.
+  const PI_DIGITS = '1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235410199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554687311595628638823537875937519577818577805321712268066130019278766111959092164201989';
 
   const style = document.createElement('style');
   style.textContent = `
@@ -83,7 +83,7 @@
   const render = () => {
     const value = input.value;
     digitsEl.innerHTML = '';
-    if (!value) { digitsEl.innerHTML = '<div class="pi-empty">start typing…</div>'; return; }
+    if (!value) { digitsEl.innerHTML = '<div class="pi-empty">start typing…</div>'; progressEl.textContent='0 digits'; liveEl.textContent='memory mode'; return; }
     [...value].forEach((digit, i) => {
       const span = document.createElement('span');
       span.className = 'pi-digit ' + (digit === PI_DIGITS[i] ? (corrected.has(i) ? 'fixed' : 'correct') : 'wrong');
@@ -93,6 +93,7 @@
     progressEl.textContent = `${value.length} digit${value.length === 1 ? '' : 's'}`;
     const wrong = [...value].filter((d,i)=>d !== PI_DIGITS[i]).length;
     liveEl.textContent = wrong ? `${wrong} currently wrong` : 'all green so far';
+    digitsEl.parentElement.scrollTop = digitsEl.parentElement.scrollHeight;
   };
 
   const finish = () => {
@@ -118,7 +119,6 @@
     if (finished) return;
     const before = input.value;
     input.value = before.replace(/\D/g,'');
-    render();
     const pos = input.value.length - 1;
     if (pos >= 0 && input.value[pos] !== PI_DIGITS[pos]) hadWrong.add(pos);
     else if (pos >= 0 && hadWrong.has(pos)) corrected.add(pos);
@@ -129,7 +129,7 @@
     if (e.key === 'Enter') { e.preventDefault(); finish(); }
   });
   finishBtn.addEventListener('click', finish);
-  overlay.querySelector('#pi-close').addEventListener('click', () => { if (!finished) overlay.classList.remove('show'); else overlay.classList.remove('show'); });
+  overlay.querySelector('#pi-close').addEventListener('click', () => overlay.classList.remove('show'));
   overlay.addEventListener('click', e => { if (e.target === overlay && !finished) overlay.classList.remove('show'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('show') && !finished) overlay.classList.remove('show'); });
 
@@ -151,7 +151,7 @@
   const decoratePi = () => {
     const all = [...document.querySelectorAll('body *')];
     all.forEach(el => {
-      if (el.closest('#pi-challenge-overlay') || el.closest('#pi-challenge-overlay')) return;
+      if (el.closest('#pi-challenge-overlay')) return;
       const text = (el.innerText || el.textContent || '').replace(/\s+/g,' ').trim();
       if (text !== 'π') return;
       if (el.dataset.piSecretReady) return;

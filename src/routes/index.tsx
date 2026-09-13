@@ -47,6 +47,14 @@ function Index() {
             audio.id = "birthday-upgrade-v5-script";
             audio.src = "/experience-upgrade-v5.js";
             audio.async = false;
+            audio.onload = () => {
+              if (doc.getElementById("birthday-upgrade-v7-script")) return;
+              const pi = doc.createElement("script");
+              pi.id = "birthday-upgrade-v7-script";
+              pi.src = "/experience-upgrade-v7.js";
+              pi.async = false;
+              doc.body.appendChild(pi);
+            };
             doc.body.appendChild(audio);
           };
           doc.body.appendChild(opening);
@@ -55,7 +63,7 @@ function Index() {
       };
       doc.body.appendChild(script);
     } catch {
-      // Same-origin in production; keep the original experience intact if injection is unavailable.
+      // Same-origin in production; keep original experience intact if injection unavailable.
     }
   };
 

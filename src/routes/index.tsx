@@ -90,11 +90,19 @@ function Index() {
                           visits.src = "/experience-upgrade-v14.js";
                           visits.async = false;
                           visits.onload = () => {
-                            if (doc.getElementById("birthday-upgrade-v15-script")) return;
+                            if (doc.getElementById("birthday-upgrade-v16-script")) return;
                             const recorder = doc.createElement("script");
-                            recorder.id = "birthday-upgrade-v15-script";
-                            recorder.src = "/experience-upgrade-v15.js";
+                            recorder.id = "birthday-upgrade-v16-script";
+                            recorder.src = "/experience-upgrade-v16.js";
                             recorder.async = false;
+                            recorder.onload = () => {
+                              if (doc.getElementById("birthday-upgrade-v17-script")) return;
+                              const footer = doc.createElement("script");
+                              footer.id = "birthday-upgrade-v17-script";
+                              footer.src = "/experience-upgrade-v17.js";
+                              footer.async = false;
+                              doc.body.appendChild(footer);
+                            };
                             doc.body.appendChild(recorder);
                           };
                           doc.body.appendChild(visits);

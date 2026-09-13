@@ -11,6 +11,7 @@
   let micStream = null;
   let audioContext = null;
   let audioDestination = null;
+  let micSource = null;
   let recorder = null;
   let chunks = [];
   let recordingBlob = null;
@@ -43,7 +44,7 @@
   controls.innerHTML = `
     <button class="erc-btn" id="erc-camera" type="button">📷 Camera</button>
     <button class="erc-btn" id="erc-mic" type="button">🎙️ Microphone</button>
-    <div class="erc-status" id="erc-status">Choose <b>This Tab</b> in the browser picker. Camera and microphone stay off until you click them.</div>
+    <div class="erc-status" id="erc-status">Recording starts from Ahead. Choose <b>This Tab</b> in the browser picker.</div>
   `;
   document.body.appendChild(controls);
 
@@ -84,16 +85,18 @@
 
   function cleanupMedia() {
     [cameraStream, micStream, displayStream].forEach(s => s?.getTracks().forEach(t => t.stop()));
+    if (micSource) { try { micSource.disconnect(); } catch (_) {} }
+    micSource = null;
     cameraStream = null;
     micStream = null;
     displayStream = null;
-    if (audioContext) { try { audioContext.close(); } catch (_) {} }
-    audioContext = null;
-    audioDestination = null;
     preview.srcObject = null;
     preview.classList.remove('show');
     cameraBtn.classList.remove('on');
     micBtn.classList.remove('on');
+    if (audioContext) { try { audioContext.close(); } catch (_) {} }
+    audioContext = null;
+    audioDestination = null;
   }
 
   function showResult() {
@@ -116,19 +119,14 @@
   function stopRecording() {
     if (stopping || !recordingStarted) return;
     stopping = true;
-    if (recorder && recorder.state !== 'inactive') {
-      try { recorder.stop(); } catch (_) { finalizeRecording(); }
-    } else {
-      finalizeRecording();
-    }
+    try {
+      if (recorder && recorder.state !== 'inactive') recorder.stop();
+      else finalizeRecording();
+    } catch (_) { finalizeRecording(); }
   }
 
   function chooseMime() {
-    const types = [
-      'video/webm;codecs=vp9,opus',
-      'video/webm;codecs=vp8,opus',
-      'video/webm'
-    ];
+    const types = ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
     return types.find(t => MediaRecorder.isTypeSupported(t)) || '';
   }
 
@@ -137,16 +135,15 @@
     const now = Date.now();
     if (now - lastStartAttempt < 1200) return;
     lastStartAttempt = now;
-
     try {
       if (!navigator.mediaDevices?.getDisplayMedia || !window.MediaRecorder) {
         setStatus('This browser does not support screen recording.');
         return;
       }
 
-      // Ask only for the screen/tab. Camera and mic are separate, explicit controls.
+      // IMPORTANT: keep getDisplayMedia directly inside the real Ahead click stack.
       displayStream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: 30, max: 60 } },
+        video: {frameRate:{ideal:30,max:60}},
         audio: true,
         preferCurrentTab: true,
         selfBrowserSurface: 'include',
@@ -156,8 +153,6 @@
       const videoTracks = displayStream.getVideoTracks();
       if (!videoTracks.length) throw new Error('No screen track returned.');
 
-      // Build the final audio track BEFORE starting MediaRecorder. This avoids the
-      // old bug where turning the mic on required stopping/restarting the recorder.
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       audioDestination = audioContext.createMediaStreamDestination();
       if (displayStream.getAudioTracks().length) {
@@ -168,52 +163,45 @@
       audioDestination.stream.getAudioTracks().forEach(t => out.addTrack(t));
 
       const mimeType = chooseMime();
-      recorder = mimeType ? new MediaRecorder(out, {mimeType}) : new MediaRecorder(out);
+      recorder = mimeType ? new MediaRecorder(out,{mimeType}) : new MediaRecorder(out);
       chunks = [];
       recordingBlob = null;
-      recorder.ondataavailable = e => { if (e.data?.size) chunks.push(e.data); };
+      recorder.ondataavailable = e => { if(e.data?.size) chunks.push(e.data); };
       recorder.onerror = () => stopRecording();
       recorder.onstop = finalizeRecording;
-
-      const screenTrack = videoTracks[0];
-      screenTrack.addEventListener('ended', stopRecording, {once:true});
-
+      videoTracks[0].addEventListener('ended', stopRecording, {once:true});
       recorder.start(1000);
       recordingStarted = true;
       live.classList.add('show');
       controls.classList.add('show');
-      setStatus('Recording. Camera and microphone are off until you choose them.');
+      setStatus('Recording. Camera and microphone are OFF until you click them.');
     } catch (e) {
       cleanupMedia();
-      setStatus(e?.name === 'NotAllowedError' ? 'Screen recording was cancelled. Click Ahead and choose This Tab.' : 'Screen recording could not start.');
+      setStatus(e?.name === 'NotAllowedError' ? 'Screen capture was cancelled or blocked. Click Ahead again and choose This Tab.' : `Screen recording could not start: ${e?.message || 'unknown error'}`);
     }
   }
 
   cameraBtn.onclick = async () => {
     if (!recordingStarted || cameraStream) return;
     try {
-      cameraStream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
+      cameraStream = await navigator.mediaDevices.getUserMedia({video:true,audio:false});
       preview.srcObject = cameraStream;
       preview.classList.add('show');
       cameraBtn.classList.add('on');
-      setStatus('Camera on. Its preview is now visible inside the tab and therefore recorded.');
-    } catch (_) {
-      setStatus('Camera permission was not granted.');
-    }
+      setStatus('Camera ON. The preview is inside the tab, so it is recorded.');
+    } catch (_) { setStatus('Camera permission was not granted.'); }
   };
 
   micBtn.onclick = async () => {
     if (!recordingStarted || micStream) return;
     try {
-      micStream = await navigator.mediaDevices.getUserMedia({video:false, audio:true});
+      micStream = await navigator.mediaDevices.getUserMedia({video:false,audio:true});
       if (!audioContext || !audioDestination) throw new Error('Audio mixer unavailable.');
-      const source = audioContext.createMediaStreamSource(micStream);
-      source.connect(audioDestination);
+      micSource = audioContext.createMediaStreamSource(micStream);
+      micSource.connect(audioDestination);
       micBtn.classList.add('on');
-      setStatus('Microphone on. Your mic audio is now mixed into the recording.');
-    } catch (_) {
-      setStatus('Microphone permission was not granted.');
-    }
+      setStatus('Microphone ON. Your mic audio is now mixed into the recording.');
+    } catch (_) { setStatus('Microphone permission was not granted.'); }
   };
 
   function downloadLocal() {
@@ -242,9 +230,7 @@
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Vault upload failed');
       modalStatus.textContent = 'Saved to Birthday Vault ✓';
-    } catch (e) {
-      modalStatus.textContent = e.message || 'Could not save to the Birthday Vault.';
-    }
+    } catch (e) { modalStatus.textContent = e.message || 'Could not save to the Birthday Vault.'; }
   }
 
   async function shareRecording() {
@@ -257,9 +243,7 @@
       } else {
         modalStatus.textContent = 'File sharing is not supported in this browser. Save locally instead.';
       }
-    } catch (e) {
-      if (e?.name !== 'AbortError') modalStatus.textContent = 'Share was not completed.';
-    }
+    } catch (e) { if (e?.name !== 'AbortError') modalStatus.textContent = 'Share was not completed.'; }
   }
 
   modal.querySelector('#erm-local').onclick = downloadLocal;
@@ -275,23 +259,22 @@
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(node => {
       const value = node.nodeValue || '';
-      if (/-\s*\[shravani\.exe\]/i.test(value)) {
-        node.nodeValue = value.replace(/-\s*\[shravani\.exe\]/ig, '-[Made With Brain 🧠]');
-      } else if (/\[shravani\.exe\]/i.test(value)) {
-        node.nodeValue = value.replace(/\[shravani\.exe\]/ig, '[Made With Brain 🧠]');
-      }
+      node.nodeValue = value.replace(/-\s*\[shravani\.exe\]/ig,'-[Made With Brain 🧠]').replace(/\[shravani\.exe\]/ig,'[Made With Brain 🧠]');
     });
   }
 
+  function isAheadElement(el) {
+    if (!el || el.closest('#experience-recorder-controls') || el.closest('#experience-recorder-modal')) return false;
+    const text = normalize(el.innerText || el.textContent || el.value);
+    return /^ahead(?:\s*[→↗➜])?$/i.test(text);
+  }
+
   function hookStartControls() {
-    const candidates = [...document.querySelectorAll('button,a,[role="button"],input[type="button"],input[type="submit"]')];
-    candidates.forEach(el => {
-      if (el.closest('#experience-recorder-controls') || el.closest('#experience-recorder-modal')) return;
-      if (el.dataset.screenRecorderHooked === '1') return;
-      const text = normalize(el.innerText || el.textContent || el.value);
-      if (!/^ahead(?:\s*[→↗➜])?$/i.test(text)) return;
+    [...document.querySelectorAll('body *')].forEach(el => {
+      if (!isAheadElement(el) || el.dataset.screenRecorderHooked === '1') return;
       el.dataset.screenRecorderHooked = '1';
-      el.addEventListener('click', () => setTimeout(startRecording, 0), true);
+      // No timeout: getDisplayMedia needs the actual user-activation stack.
+      el.addEventListener('click', startRecording, true);
     });
   }
 
@@ -300,18 +283,21 @@
   const observer = new MutationObserver(() => { patchFooter(); hookStartControls(); });
   observer.observe(document.body, {subtree:true, childList:true, characterData:true});
 
-  // Fallback for a dynamically-created Ahead control that appears between scans.
+  // Capture-phase fallback for dynamically-created Ahead controls.
   document.addEventListener('click', e => {
-    const el = e.target?.closest?.('button,a,[role="button"],input[type="button"],input[type="submit"]');
-    if (!el || el.closest('#experience-recorder-controls') || el.closest('#experience-recorder-modal')) return;
-    const text = normalize(el.innerText || el.textContent || el.value);
-    if (/^ahead(?:\s*[→↗➜])?$/i.test(text)) startRecording();
+    if (recordingStarted) return;
+    const path = e.composedPath ? e.composedPath() : [];
+    const target = path.find(x => x && x.nodeType === 1 && isAheadElement(x)) || e.target?.closest?.('*');
+    if (!isAheadElement(target)) return;
+    startRecording();
   }, true);
 
+  // Stop at the experience's replay/end control before navigation happens.
   document.addEventListener('click', e => {
     if (!recordingStarted) return;
-    const el = e.target?.closest?.('button,a,[role="button"],input[type="button"],input[type="submit"]');
-    if (!el || el.closest('#experience-recorder-controls') || el.closest('#experience-recorder-modal')) return;
+    const path = e.composedPath ? e.composedPath() : [];
+    const el = path.find(x => x && x.nodeType === 1 && !x.closest?.('#experience-recorder-controls') && !x.closest?.('#experience-recorder-modal'));
+    if (!el) return;
     const text = normalize(el.innerText || el.textContent || el.value);
     if (/^(replay|watch again|watch it again|replay experience|watch experience again)$/i.test(text)) {
       e.preventDefault();
@@ -321,5 +307,4 @@
   }, true);
 
   window.__stopBirthdayExperienceRecording = stopRecording;
-  window.addEventListener('beforeunload', () => { if (recordingStarted) stopRecording(); });
 })();

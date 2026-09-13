@@ -254,14 +254,24 @@
   modal.querySelector('#erm-share').onclick = shareRecording;
   modal.querySelector('#erm-close').onclick = () => modal.classList.remove('show');
 
-  // Start the recording when the existing Ahead control is clicked. The existing
-  // navigation is allowed to continue normally; the browser's capture picker then
-  // asks the visitor which source to share.
   document.addEventListener('click', e => {
     const el = e.target?.closest?.('button,[role="button"],a');
     if (!el || el.closest('#experience-recorder-controls') || el.closest('#experience-recorder-modal')) return;
     const text = String(el.innerText || el.textContent || '').trim();
     if (/^ahead\s*[→↗]?$/i.test(text)) startRecording();
+  }, true);
+
+  // The experience's final Replay/Watch Again control marks the end of the
+  // recording. Stop first so the result dialog appears before replay navigation.
+  document.addEventListener('click', e => {
+    const el = e.target?.closest?.('button,[role="button"],a');
+    if (!el || !recordingStarted) return;
+    const text = String(el.innerText || el.textContent || '').replace(/\s+/g,' ').trim();
+    if (/^(replay|watch again|watch it again)$/i.test(text)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      stopRecording();
+    }
   }, true);
 
   window.addEventListener('keydown', e => {

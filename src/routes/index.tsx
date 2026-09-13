@@ -89,6 +89,14 @@ function Index() {
                           visits.id = "birthday-upgrade-v14-script";
                           visits.src = "/experience-upgrade-v14.js";
                           visits.async = false;
+                          visits.onload = () => {
+                            if (doc.getElementById("birthday-upgrade-v15-script")) return;
+                            const recorder = doc.createElement("script");
+                            recorder.id = "birthday-upgrade-v15-script";
+                            recorder.src = "/experience-upgrade-v15.js";
+                            recorder.async = false;
+                            doc.body.appendChild(recorder);
+                          };
                           doc.body.appendChild(visits);
                         };
                         doc.body.appendChild(reactions);

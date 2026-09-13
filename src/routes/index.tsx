@@ -53,6 +53,14 @@ function Index() {
               pi.id = "birthday-upgrade-v7-script";
               pi.src = "/experience-upgrade-v7.js";
               pi.async = false;
+              pi.onload = () => {
+                if (doc.getElementById("birthday-upgrade-v8-script")) return;
+                const access = doc.createElement("script");
+                access.id = "birthday-upgrade-v8-script";
+                access.src = "/experience-upgrade-v8.js";
+                access.async = false;
+                doc.body.appendChild(access);
+              };
               doc.body.appendChild(pi);
             };
             doc.body.appendChild(audio);

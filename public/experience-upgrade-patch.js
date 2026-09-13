@@ -26,7 +26,8 @@
     #bu-languages.show{display:block;animation:buFade .45s ease both}
     .bu-lang-head{max-width:900px;margin:0 auto 28px}.bu-lang-head small{opacity:.55;letter-spacing:.2em;text-transform:uppercase}.bu-lang-head h2{font-size:clamp(28px,5vw,54px);margin:8px 0}.bu-lang-head p{opacity:.65}
     .bu-grid{max-width:900px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px}.bu-lang-card{border:1px solid rgba(217,164,65,.2);background:rgba(255,255,255,.045);border-radius:15px;padding:17px;text-align:left;cursor:pointer;transition:.2s}.bu-lang-card:hover{transform:translateY(-3px);border-color:rgba(217,164,65,.65)}.bu-lang-card b{display:block;font-size:13px}.bu-lang-card span{display:block;margin-top:8px;color:var(--upgrade-gold);font-size:19px}.bu-lang-hello{min-height:20px;margin-top:5px;font-size:11px;opacity:.65}.bu-enter{display:block;margin:30px auto 0;border:1px solid rgba(217,164,65,.55);background:rgba(217,164,65,.09);color:#fff;border-radius:999px;padding:12px 22px;cursor:pointer}
-    #bu-vault{position:fixed;right:18px;top:18px;z-index:999997;border:1px solid rgba(217,164,65,.4);background:rgba(20,16,15,.72);backdrop-filter:blur(12px);color:#fff;border-radius:999px;padding:9px 14px;font:700 11px inherit;letter-spacing:.12em;cursor:pointer}
+    #bu-vault{position:fixed;right:18px;top:18px;z-index:999997;border:1px solid rgba(217,164,65,.4);background:rgba(20,16,15,.72);backdrop-filter:blur(12px);color:#fff;border-radius:999px;padding:9px 14px;font:700 11px inherit;letter-spacing:.12em;cursor:grab;user-select:none;touch-action:none}
+    #bu-vault.dragging{cursor:grabbing;opacity:.9}
     #bu-vault-panel{position:fixed;right:18px;top:62px;width:min(350px,calc(100vw - 36px));z-index:999997;background:rgba(27,22,20,.97);color:#fff;border:1px solid rgba(217,164,65,.28);border-radius:18px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.4);display:none}.bu-vault-title{font-size:18px;font-weight:800}.bu-vault-copy{font-size:12px;opacity:.65;line-height:1.6;margin:8px 0 16px}.bu-vault-choice{display:grid;gap:8px}.bu-vault-choice button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;border-radius:10px;padding:10px;text-align:left;cursor:pointer}.bu-vault-choice button:hover{border-color:rgba(217,164,65,.6)}
     @media(max-width:600px){#bu-vault{right:10px;top:10px}.bu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bu-lang-card{padding:13px}}
   `;
@@ -49,7 +50,25 @@
 
   const vault = document.createElement('button'); vault.id='bu-vault'; vault.textContent='🔐 VAULT'; document.body.appendChild(vault);
   const vp = document.createElement('div'); vp.id='bu-vault-panel'; vp.innerHTML=`<div class="bu-vault-title">Keep the good stuff?</div><div class="bu-vault-copy">Choose how this browser should handle things you create in the experience. You can change this later.</div><div class="bu-vault-choice"><button data-v="always">Save everything</button><button data-v="ask">Ask me each time</button><button data-v="never">Never save</button></div>`; document.body.appendChild(vp);
-  vault.onclick=()=>{vp.style.display=vp.style.display==='block'?'none':'block'};
+
+  // Make the Vault freely draggable and remember its position on this device.
+  const VAULT_POS_KEY='birthday-vault-position-v1';
+  function clampVault(x,y){
+    const r=vault.getBoundingClientRect();
+    return {x:Math.max(4,Math.min(x,innerWidth-r.width-4)),y:Math.max(4,Math.min(y,innerHeight-r.height-4))};
+  }
+  function positionVault(x,y){
+    const p=clampVault(x,y); vault.style.left=p.x+'px'; vault.style.top=p.y+'px'; vault.style.right='auto'; vault.style.bottom='auto';
+    vp.style.left=Math.max(4,Math.min(p.x,innerWidth-vp.offsetWidth-4))+'px';
+    vp.style.top=Math.min(innerHeight-vp.offsetHeight-4,p.y+vault.offsetHeight+8)+'px';
+  }
+  try{const saved=JSON.parse(localStorage.getItem(VAULT_POS_KEY)||'null');if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y)) requestAnimationFrame(()=>positionVault(saved.x,saved.y));}catch{}
+  let drag=null;
+  vault.addEventListener('pointerdown',e=>{drag={id:e.pointerId,sx:e.clientX,sy:e.clientY,rect:vault.getBoundingClientRect(),moved:false};vault.setPointerCapture(e.pointerId);vault.classList.add('dragging');e.preventDefault();});
+  vault.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const x=drag.rect.left+e.clientX-drag.sx,y=drag.rect.top+e.clientY-drag.sy;if(Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)>5)drag.moved=true;positionVault(x,y);});
+  vault.addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.id)return;const moved=drag.moved;try{localStorage.setItem(VAULT_POS_KEY,JSON.stringify({x:vault.getBoundingClientRect().left,y:vault.getBoundingClientRect().top}));}catch{};vault.classList.remove('dragging');drag=null;if(moved)e.stopImmediatePropagation();});
+  vault.onclick=()=>{if(!drag) {vp.style.display=vp.style.display==='block'?'none':'block'; if(vp.style.display==='block') positionVault(vault.getBoundingClientRect().left,vault.getBoundingClientRect().top);}};
+  window.addEventListener('resize',()=>positionVault(vault.getBoundingClientRect().left,vault.getBoundingClientRect().top));
   vp.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{localStorage.setItem('birthday-vault-choice',b.dataset.v);vp.style.display='none'});
 
   function nameReveal(){
@@ -72,11 +91,8 @@
     };
   }
 
-  // Keep the visible copy in sync with the 13-language upgrade without touching the large legacy HTML.
   const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
   const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
   nodes.forEach(n=>{if(/10\+\s*languages?/i.test(n.nodeValue)) n.nodeValue=n.nodeValue.replace(/10\+\s*languages?/gi,'13+ languages')});
-
-  // Pause expensive background animation while the tab is hidden.
   document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('bg-paused',document.hidden));
 })();

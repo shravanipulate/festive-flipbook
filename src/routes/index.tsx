@@ -71,6 +71,14 @@ function Index() {
                     easter.id = "birthday-c-easter-demo-script";
                     easter.src = "/experience-easter-demo.js";
                     easter.async = false;
+                    easter.onload = () => {
+                      if (doc.getElementById("birthday-upgrade-v12-script")) return;
+                      const potential = doc.createElement("script");
+                      potential.id = "birthday-upgrade-v12-script";
+                      potential.src = "/experience-upgrade-v12.js";
+                      potential.async = false;
+                      doc.body.appendChild(potential);
+                    };
                     doc.body.appendChild(easter);
                   };
                   doc.body.appendChild(secretFix);

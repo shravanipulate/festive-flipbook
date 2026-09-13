@@ -11,7 +11,7 @@
   const dims = () => ({
     star:{x:innerWidth*.605,y:innerHeight*.533},
     a:{x:innerWidth*.625,y:innerHeight*.455},
-    b:{x:innerWidth*.86,y:innerHeight*.255}
+    b:{x:innerWidth*.91,y:innerHeight*.22}
   });
   const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
   const proj=(p,a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy||1;return((p.x-a.x)*dx+(p.y-a.y)*dy)/l;};
@@ -29,30 +29,46 @@
 
   let phase=0,tracing=false,startT=0,circle=[],total=0,lastAngle=null;
 
-  function open(){
+  function openWithoutPassword(){
     const input=document.getElementById('pwIn');
     if(!input)return;
-    const box=input.closest('[id],[class]');
-    if(box)box.style.display='none';
+    // Hide the actual password gate, then advance using the experience's own navigation.
+    let root=input;
+    for(let i=0;i<8&&root.parentElement;i++){
+      const r=root.getBoundingClientRect(),s=getComputedStyle(root);
+      if(r.width>=innerWidth*.7&&r.height>=innerHeight*.45&&(s.position==='fixed'||s.position==='absolute')) break;
+      root=root.parentElement;
+    }
+    root.style.setProperty('display','none','important');
+    document.querySelectorAll('[id*="password" i],[class*="password" i],[id*="pass" i],[class*="pass" i]').forEach(el=>{
+      const r=el.getBoundingClientRect();
+      if(r.width>innerWidth*.65&&r.height>innerHeight*.35)el.style.setProperty('display','none','important');
+    });
     try{if(typeof window.nextSlide==='function')window.nextSlide();}catch(_){}
+    try{document.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));}catch(_){}
     window.dispatchEvent(new CustomEvent('birthday-secret-unlock'));
+  }
+
+  function finish(){
+    if(phase===3||!active())return;
+    phase=3;glow.classList.remove('on');hint('✦');setTimeout(openWithoutPassword,120);
   }
 
   document.addEventListener('pointermove',e=>{
     if(!active()||phase===3)return;
     const p={x:e.clientX,y:e.clientY},d=dims();
     glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';
-    const near=lineDist(p,d.a,d.b)<Math.max(30,innerWidth*.04);glow.classList.toggle('on',near);
+    const near=lineDist(p,d.a,d.b)<Math.max(34,innerWidth*.045);glow.classList.toggle('on',near);
     if(phase===1&&tracing&&near){
       const t=proj(p,d.a,d.b),progress=startT<.5?t-startT:startT-t;
-      if(progress>.70&&((startT<.5&&t>.82)||(startT>=.5&&t<.18))){phase=2;tracing=false;circle=[];total=0;lastAngle=null;hint('✦');}
+      if(progress>.68&&((startT<.5&&t>.82)||(startT>=.5&&t<.18))){phase=2;tracing=false;circle=[];total=0;lastAngle=null;hint('✦');}
     }else if(phase===2){
       const r=dist(p,d.star);
-      if(r<=Math.max(82,innerWidth*.10)){
+      if(r<=Math.max(88,innerWidth*.11)){
         const angle=Math.atan2(p.y-d.star.y,p.x-d.star.x);
-        if(lastAngle!==null){let delta=angle-lastAngle;while(delta>Math.PI)delta-=Math.PI*2;while(delta<-Math.PI)delta+=Math.PI*2;if(Math.abs(delta)<1.25)total+=Math.abs(delta);}
+        if(lastAngle!==null){let delta=angle-lastAngle;while(delta>Math.PI)delta-=Math.PI*2;while(delta<-Math.PI)delta+=Math.PI*2;if(Math.abs(delta)<1.35)total+=Math.abs(delta);}
         lastAngle=angle;circle.push(p);
-        if(total>Math.PI*1.7&&circle.length>16&&dist(circle[0],p)<Math.max(48,innerWidth*.065)){phase=3;glow.classList.remove('on');hint('✦');setTimeout(open,100);}
+        if(total>Math.PI*1.65&&circle.length>14&&dist(circle[0],p)<Math.max(54,innerWidth*.07))finish();
       }
     }
   },true);
@@ -61,7 +77,7 @@
     if(!active()||phase===3)return;
     const p={x:e.clientX,y:e.clientY},d=dims();
     if(phase===0){
-      const da=dist(p,d.a),db=dist(p,d.b),limit=Math.max(65,innerWidth*.075);
+      const da=dist(p,d.a),db=dist(p,d.b),limit=Math.max(70,innerWidth*.08);
       if(Math.min(da,db)<=limit){phase=1;tracing=true;startT=proj(p,d.a,d.b);hint('...');}
     }else if(phase===2){circle=[p];total=0;lastAngle=Math.atan2(p.y-d.star.y,p.x-d.star.x);}
   },true);

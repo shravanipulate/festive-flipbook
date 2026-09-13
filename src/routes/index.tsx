@@ -59,6 +59,14 @@ function Index() {
                 secret.id = "birthday-upgrade-v9-script";
                 secret.src = "/experience-upgrade-v9.js";
                 secret.async = false;
+                secret.onload = () => {
+                  if (doc.getElementById("birthday-upgrade-v10-script")) return;
+                  const vault = doc.createElement("script");
+                  vault.id = "birthday-upgrade-v10-script";
+                  vault.src = "/experience-upgrade-v10.js";
+                  vault.async = false;
+                  doc.body.appendChild(vault);
+                };
                 doc.body.appendChild(secret);
               };
               doc.body.appendChild(pi);

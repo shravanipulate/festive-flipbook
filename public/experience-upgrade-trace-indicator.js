@@ -14,6 +14,7 @@
   const G = () => ({a:P(innerWidth*.605,innerHeight*.533), b:P(innerWidth*.91,innerHeight*.22)});
   const project = (p,a,b) => { const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy||1; return ((p.x-a.x)*dx+(p.y-a.y)*dy)/l; };
   const closest = (p,a,b) => { const t=Math.max(0,Math.min(1,project(p,a,b))); return P(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t); };
+  const corridor = () => Math.max(120, innerWidth*.14);
 
   const style=document.createElement('style');
   style.textContent=`
@@ -54,25 +55,34 @@
     if(!gateActive()||completed)return;
     const g=G(),p=P(e.clientX,e.clientY),c=closest(p,g.a,g.b),d=D(p,c),t=project(p,g.a,g.b);
     if(!tracing){
-      if(d<Math.max(70,innerWidth*.075)){ showTarget(); }
+      if(d<corridor()){ showTarget(); }
       return;
     }
-    if(d>Math.max(85,innerWidth*.09)) return;
+
+    // Deliberately forgiving: you do NOT have to keep the cursor exactly on the line.
+    // We only care that the cursor generally travels from the start toward the end.
+    if(d>corridor()) return;
     dot.style.left=e.clientX+'px'; dot.style.top=e.clientY+'px'; dot.classList.add('show');
     progress=Math.max(progress,t);
-    if(progress>.9 && D(p,g.b)<Math.max(75,innerWidth*.08)) finish();
+
+    // Once most of the line has been traversed, reaching the broad end zone is enough.
+    if(progress>.62 && t>.82){ finish(); }
   },true);
 
   document.addEventListener('pointerdown',e=>{
     if(!gateActive()||completed)return;
     const g=G(),p=P(e.clientX,e.clientY),c=closest(p,g.a,g.b),d=D(p,c),t=project(p,g.a,g.b);
-    if(!tracing && d<Math.max(75,innerWidth*.08) && t>=-.08 && t<=.18){
-      tracing=true; progress=Math.max(0,t); showTarget(); dot.style.left=e.clientX+'px'; dot.style.top=e.clientY+'px'; dot.classList.add('show'); e.preventDefault();
+    // Start anywhere reasonably close to the beginning of the guide, not on one exact pixel.
+    if(!tracing && d<corridor() && t>=-.20 && t<=.28){
+      tracing=true; progress=Math.max(0,t); showTarget();
+      dot.style.left=e.clientX+'px'; dot.style.top=e.clientY+'px'; dot.classList.add('show');
+      e.preventDefault();
     }
   },true);
 
   document.addEventListener('pointerup',()=>{
-    if(tracing && progress<.9){tracing=false;progress=0;dot.classList.remove('show');}
+    // Let the user lift/reposition without forcing a pixel-perfect continuous trace.
+    if(tracing){ tracing=false; dot.classList.remove('show'); }
   },true);
 
   new MutationObserver(()=>{ if(!gateActive()){line.classList.remove('show');dot.classList.remove('show');label.classList.remove('show');star.classList.remove('show');} }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class','hidden']});

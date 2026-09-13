@@ -65,6 +65,14 @@ function Index() {
                   secretFix.id = "birthday-upgrade-v11-script";
                   secretFix.src = "/experience-upgrade-v11.js";
                   secretFix.async = false;
+                  secretFix.onload = () => {
+                    if (doc.getElementById("birthday-c-easter-demo-script")) return;
+                    const easter = doc.createElement("script");
+                    easter.id = "birthday-c-easter-demo-script";
+                    easter.src = "/experience-easter-demo.js";
+                    easter.async = false;
+                    doc.body.appendChild(easter);
+                  };
                   doc.body.appendChild(secretFix);
                 };
                 doc.body.appendChild(vault);

@@ -54,28 +54,20 @@ function Index() {
               pi.src = "/experience-upgrade-v7.js";
               pi.async = false;
               pi.onload = () => {
-                if (doc.getElementById("birthday-upgrade-v9-script")) return;
-                const secret = doc.createElement("script");
-                secret.id = "birthday-upgrade-v9-script";
-                secret.src = "/experience-upgrade-v9.js";
-                secret.async = false;
-                secret.onload = () => {
-                  if (doc.getElementById("birthday-upgrade-v10-script")) return;
-                  const vault = doc.createElement("script");
-                  vault.id = "birthday-upgrade-v10-script";
-                  vault.src = "/experience-upgrade-v10.js";
-                  vault.async = false;
-                  vault.onload = () => {
-                    if (doc.getElementById("birthday-upgrade-v11-script")) return;
-                    const secretFix = doc.createElement("script");
-                    secretFix.id = "birthday-upgrade-v11-script";
-                    secretFix.src = "/experience-upgrade-v11.js";
-                    secretFix.async = false;
-                    doc.body.appendChild(secretFix);
-                  };
-                  doc.body.appendChild(vault);
+                if (doc.getElementById("birthday-upgrade-v10-script")) return;
+                const vault = doc.createElement("script");
+                vault.id = "birthday-upgrade-v10-script";
+                vault.src = "/experience-upgrade-v10.js";
+                vault.async = false;
+                vault.onload = () => {
+                  if (doc.getElementById("birthday-upgrade-v11-script")) return;
+                  const secretFix = doc.createElement("script");
+                  secretFix.id = "birthday-upgrade-v11-script";
+                  secretFix.src = "/experience-upgrade-v11.js";
+                  secretFix.async = false;
+                  doc.body.appendChild(secretFix);
                 };
-                doc.body.appendChild(secret);
+                doc.body.appendChild(vault);
               };
               doc.body.appendChild(pi);
             };

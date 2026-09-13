@@ -65,14 +65,6 @@ function Index() {
                   secretFix.id = "birthday-upgrade-v11-script";
                   secretFix.src = "/experience-upgrade-v11.js";
                   secretFix.async = false;
-                  secretFix.onload = () => {
-                    if (doc.getElementById("birthday-upgrade-trace-indicator-script")) return;
-                    const trace = doc.createElement("script");
-                    trace.id = "birthday-upgrade-trace-indicator-script";
-                    trace.src = "/experience-upgrade-trace-indicator.js";
-                    trace.async = false;
-                    doc.body.appendChild(trace);
-                  };
                   doc.body.appendChild(secretFix);
                 };
                 doc.body.appendChild(vault);

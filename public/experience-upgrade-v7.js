@@ -6,6 +6,13 @@
 
   const style = document.createElement('style');
   style.textContent = `
+    .pi-seven-trigger{cursor:pointer!important;animation:piSevenGlow 2s ease-in-out infinite!important;border-radius:6px;padding:1px 3px;}
+    @keyframes piSevenGlow{0%,100%{text-shadow:0 0 0 transparent;opacity:.82}50%{text-shadow:0 0 10px rgba(217,164,65,.72),0 0 22px rgba(217,164,65,.25);opacity:1}}
+    #pi-reveal-overlay{position:fixed;inset:0;z-index:1000006;display:none;align-items:center;justify-content:center;background:rgba(10,9,8,.92);color:#fff;font-family:inherit}
+    #pi-reveal-overlay.show{display:flex;animation:piReveal .22s ease both}
+    @keyframes piReveal{from{opacity:0}to{opacity:1}}
+    .pi-reveal-text{font:700 clamp(30px,7vw,72px)/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.04em;animation:piRevealText .7s ease both}
+    @keyframes piRevealText{0%{opacity:0;transform:scale(.92)}35%,70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.04)}}
     #pi-challenge-overlay{position:fixed;inset:0;z-index:1000005;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,9,8,.78);backdrop-filter:blur(12px);color:#fff;font-family:inherit}
     #pi-challenge-overlay.show{display:flex;animation:piFade .28s ease both}
     @keyframes piFade{from{opacity:0}to{opacity:1}}
@@ -26,6 +33,11 @@
     .pi-hint{font-size:10px;opacity:.35;margin-top:10px}
   `;
   document.head.appendChild(style);
+
+  const reveal = document.createElement('div');
+  reveal.id = 'pi-reveal-overlay';
+  reveal.innerHTML = '<div class="pi-reveal-text">&lt;3.14</div>';
+  document.body.appendChild(reveal);
 
   const overlay = document.createElement('div');
   overlay.id = 'pi-challenge-overlay';
@@ -52,7 +64,6 @@
     result.textContent = '';
     result.className = 'pi-result';
   };
-
   input.addEventListener('input', cleanInput);
 
   const check = () => {
@@ -79,18 +90,46 @@
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.classList.remove('show'); });
 
-  const isPiTarget = el => {
-    if (!el || el.closest('#pi-challenge-overlay')) return false;
-    const text = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
-    return text === 'π' || /^π\s*[+×x·]\s*π$/.test(text) || /^pi$/i.test(text);
+  const findSevenPi = () => {
+    const leaves = [...document.querySelectorAll('body *')].filter(el => {
+      if (el.children.length) return false;
+      const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      return text === 'π' || /^pi$/i.test(text);
+    });
+    for (const el of leaves) {
+      let p = el.parentElement;
+      for (let depth = 0; p && depth < 6; depth++, p = p.parentElement) {
+        const context = (p.innerText || p.textContent || '').replace(/\s+/g, ' ').trim();
+        const sevens = (context.match(/7/g) || []).length;
+        if (sevens >= 2 && context.includes(el.textContent.trim())) {
+          el.classList.add('pi-seven-trigger');
+          el.setAttribute('title', '…you noticed π.');
+          return el;
+        }
+      }
+    }
+    return null;
   };
 
+  const openChallenge = () => {
+    reveal.classList.add('show');
+    setTimeout(() => {
+      reveal.classList.remove('show');
+      overlay.classList.add('show');
+      input.focus();
+    }, 760);
+  };
+
+  let piTarget = null;
+  const boot = () => { piTarget = piTarget || findSevenPi(); };
+  boot();
+  new MutationObserver(boot).observe(document.body, {subtree:true, childList:true, characterData:true});
+
   document.addEventListener('click', e => {
-    const target = e.target?.closest?.('button,[role="button"],a,span,div');
-    if (!isPiTarget(target)) return;
+    const target = e.target?.closest?.('.pi-seven-trigger');
+    if (!target) return;
     e.preventDefault();
     e.stopImmediatePropagation();
-    overlay.classList.add('show');
-    input.focus();
+    openChallenge();
   }, true);
 })();

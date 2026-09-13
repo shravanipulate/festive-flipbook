@@ -1,6 +1,5 @@
 /* Anonymous site-visit timing patch.
    Stores only a visit id, timestamps, and approximate active duration.
-   A small disclosure is added to the experience UI.
 */
 (function () {
   'use strict';
@@ -75,19 +74,6 @@
     post({ action: 'end', visit_id: visitId, duration_seconds: activeSeconds }, true);
   }
 
-  function addDisclosure() {
-    if (document.getElementById('anonymous-visit-disclosure')) return;
-    const el = document.createElement('div');
-    el.id = 'anonymous-visit-disclosure';
-    el.textContent = 'Anonymous site stats: visit count + approximate active time only.';
-    el.style.cssText = [
-      'position:fixed', 'right:8px', 'bottom:6px', 'z-index:2147483646',
-      'font:10px/1.25 system-ui,sans-serif', 'opacity:.42',
-      'pointer-events:none', 'max-width:260px', 'text-align:right'
-    ].join(';');
-    (document.body || document.documentElement).appendChild(el);
-  }
-
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') heartbeat();
     else lastTick = Date.now();
@@ -96,6 +82,5 @@
   window.addEventListener('beforeunload', endVisit);
   setInterval(heartbeat, 15000);
 
-  addDisclosure();
   start();
 })();

@@ -7678,4 +7678,24 @@ body{text-rendering:optimizeLegibility}
 if(!g)return;function sync(){var open=getComputedStyle(g).display!=='none'&&g.style.opacity!=='0';r.classList.toggle('gate-locked',open);}
 sync();new MutationObserver(sync).observe(g,{attributes:true,attributeFilter:['style','class','hidden']});})();
 </script>
+
+<!-- feature layers: vault, games, site views, recorder -->
+<script>
+(function(){
+  var FILES=["experience-upgrade-v2.js", "experience-upgrade-v3.js", "experience-upgrade-v4.js", "experience-upgrade-v5.js", "experience-upgrade-v7.js", "experience-upgrade-v21.js", "experience-upgrade-v10.js", "experience-upgrade-v11.js", "experience-easter-demo.js", "experience-upgrade-v12.js", "experience-upgrade-v13.js", "experience-upgrade-v14.js", "experience-upgrade-v20.js", "experience-upgrade-v16.js", "experience-upgrade-v17.js"];
+  var i=0;
+  function next(){
+    if(i>=FILES.length)return;
+    var s=document.createElement('script');
+    s.src='/'+FILES[i++];
+    s.async=false;
+    s.onload=function(){setTimeout(next,60);};
+    s.onerror=function(){setTimeout(next,60);};
+    document.body.appendChild(s);
+  }
+  function start(){setTimeout(next,400);}
+  if(document.readyState==='complete')start();
+  else window.addEventListener('load',start,{once:true});
+})();
+</script>
 </body></html>

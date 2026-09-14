@@ -1,69 +1,269 @@
 (() => {
-  if (window.__birthdayUnscrambleReplacementLoaded) return;
-  window.__birthdayUnscrambleReplacementLoaded = true;
+  if (window.__birthdayFinalGameV22Loaded) return;
+  window.__birthdayFinalGameV22Loaded = true;
 
-  const style=document.createElement('style');
-  style.textContent=`#unscramble-overlay{position:fixed;inset:0;z-index:1000005;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(8,7,7,.97);backdrop-filter:blur(16px);color:#fff;font-family:inherit}#unscramble-overlay.show{display:flex}.us-card{width:min(820px,95vw);min-height:390px;background:linear-gradient(145deg,rgba(29,24,21,.99),rgba(16,14,13,.99));border:1px solid rgba(217,164,65,.35);border-radius:26px;padding:30px;box-shadow:0 35px 120px rgba(0,0,0,.58);text-align:center}.us-kicker{font-size:9px;letter-spacing:.28em;text-transform:uppercase;opacity:.45}.us-title{font-size:27px;font-weight:850;margin:0}.us-copy{font-size:12px;line-height:1.65;opacity:.58;margin:10px auto 22px;max-width:570px}.us-board{min-height:155px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.18);border-radius:18px;padding:20px;display:flex;flex-wrap:wrap;gap:10px;align-content:center;justify-content:center}.us-letter{width:46px;height:56px;border:1px solid rgba(217,164,65,.3);background:rgba(255,255,255,.05);color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:850;cursor:grab;user-select:none;touch-action:none}.us-letter.dragging{opacity:.35}.us-letter.selected{outline:2px solid rgba(233,174,80,.8);outline-offset:2px}.us-letter.correct{border-color:rgba(100,220,150,.75);background:rgba(60,160,100,.14)}.us-actions{display:flex;justify-content:center;gap:9px;margin-top:16px;flex-wrap:wrap}.us-btn{border:1px solid rgba(217,164,65,.4);background:rgba(217,164,65,.09);color:#fff;border-radius:11px;padding:10px 16px;cursor:pointer;font:700 11px inherit}.us-status{min-height:18px;margin-top:13px;font-size:10px;opacity:.5}`;
+  const TARGET = 'YOUAREAMAZING';
+  const START_ORDER = [7, 1, 10, 4, 12, 0, 8, 3, 11, 5, 2, 9, 6];
+  const HIDE_ATTR = 'data-birthday-final-game-hidden';
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .ff-unscramble-mount{width:100%;box-sizing:border-box;margin:18px 0 8px}
+    .ff-unscramble-root{width:min(760px,100%);margin:0 auto;padding:18px 0;text-align:center;font-family:inherit}
+    .ff-unscramble-kicker{font-size:9px;letter-spacing:.24em;text-transform:uppercase;opacity:.48;margin-bottom:7px}
+    .ff-unscramble-title{font-size:24px;font-weight:850;margin:0 0 7px}
+    .ff-unscramble-copy{font-size:11px;line-height:1.6;opacity:.58;max-width:560px;margin:0 auto 18px}
+    .ff-unscramble-board{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;min-height:76px;padding:15px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(0,0,0,.12);box-sizing:border-box}
+    .ff-unscramble-tile{width:42px;height:50px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(217,164,65,.32);border-radius:10px;background:rgba(255,255,255,.045);font:800 21px/1 inherit;cursor:grab;user-select:none;touch-action:none;box-sizing:border-box;transition:transform .12s,opacity .12s,outline-color .12s}
+    .ff-unscramble-tile:hover{transform:translateY(-2px)}
+    .ff-unscramble-tile.selected{outline:2px solid rgba(233,174,80,.8);outline-offset:2px}
+    .ff-unscramble-tile.dragging{opacity:.35}
+    .ff-unscramble-tile.correct{border-color:rgba(100,220,150,.72);background:rgba(60,160,100,.13);cursor:default}
+    .ff-unscramble-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:13px}
+    .ff-unscramble-btn{border:1px solid rgba(217,164,65,.4);background:rgba(217,164,65,.09);color:inherit;border-radius:10px;padding:9px 14px;cursor:pointer;font:700 11px inherit}
+    .ff-unscramble-btn:disabled{opacity:.45;cursor:default}
+    .ff-unscramble-status{min-height:18px;margin-top:10px;font-size:10px;opacity:.58}
+    .ff-unscramble-success{margin-top:8px;font-size:12px;opacity:.78}
+  `;
   document.head.appendChild(style);
 
-  const overlay=document.createElement('div');overlay.id='unscramble-overlay';overlay.innerHTML=`<div class="us-card"><div class="us-kicker">one last little problem</div><h2 class="us-title">Put this back together.</h2><div class="us-copy">The pieces are intentionally unhelpful. No hints. No word length. No indication of how many words there are. Just figure it out.</div><div class="us-board" id="us-board"></div><div class="us-actions"><button class="us-btn" id="us-shuffle" type="button">Shuffle</button><button class="us-btn" id="us-check" type="button">Lock it in</button><button class="us-btn" id="us-leave" type="button">Leave</button></div><div class="us-status" id="us-status"></div></div>`;document.body.appendChild(overlay);
-  const board=overlay.querySelector('#us-board'),status=overlay.querySelector('#us-status');
-  const target='YOUAREAMAZING',hardOrder=[7,1,10,4,12,0,8,3,11,5,2,9,6];
-  let letters=[],solved=false,dragIndex=null,selectedIndex=null,opened=false;
+  const text = el => String(el?.textContent || '').replace(/\s+/g, ' ').trim();
+  const lower = el => text(el).toLowerCase();
 
-  function render(){
-    board.innerHTML='';
-    letters.forEach((letter,index)=>{
-      const el=document.createElement('div');
-      el.className='us-letter'+(selectedIndex===index?' selected':'')+(solved?' correct':'');
-      el.draggable=!solved;
-      el.textContent=letter;
-      el.addEventListener('click',()=>{
-        if(solved)return;
-        if(selectedIndex===null){selectedIndex=index;render();return}
-        if(selectedIndex===index){selectedIndex=null;render();return}
-        [letters[selectedIndex],letters[index]]=[letters[index],letters[selectedIndex]];
-        selectedIndex=null;status.textContent='';render();
-      });
-      el.addEventListener('dragstart',e=>{if(solved)return;dragIndex=index;selectedIndex=null;el.classList.add('dragging');if(e.dataTransfer)e.dataTransfer.effectAllowed='move'});
-      el.addEventListener('dragend',()=>{dragIndex=null;el.classList.remove('dragging')});
-      el.addEventListener('dragover',e=>{if(!solved)e.preventDefault()});
-      el.addEventListener('drop',e=>{e.preventDefault();if(solved||dragIndex===null||dragIndex===index)return;const moved=letters.splice(dragIndex,1)[0];letters.splice(index,0,moved);dragIndex=null;selectedIndex=null;status.textContent='';render()});
-      board.appendChild(el);
+  function lettersSlide() {
+    return document.getElementById('sLetters') || document.querySelector('[id*="letters" i]');
+  }
+
+  function active(el) {
+    return !!el && (el.classList.contains('active') || el.classList.contains('current') || getComputedStyle(el).display !== 'none');
+  }
+
+  function isClearlySlide(el) {
+    if (!el || el === document.body) return true;
+    const id = String(el.id || '');
+    const cls = typeof el.className === 'string' ? el.className : '';
+    return /^s[A-Z]/.test(id) || /\bslide\b/i.test(cls) || /slide/i.test(id);
+  }
+
+  // Find only the old coin-toss component. Never climb into the slide itself.
+  function findOldCoinGame(slide) {
+    const markers = ['fair coin', 'exactly two heads', 'coin is tossed', 'sequence:'];
+    const leaves = [...slide.querySelectorAll('*')].filter(el => {
+      if (el.children.length) return false;
+      const t = lower(el);
+      return markers.some(m => t.includes(m));
     });
-  }
 
-  function reset(){solved=false;selectedIndex=null;dragIndex=null;status.textContent='Tap two letters to swap them, or drag them into place.';letters=hardOrder.map(i=>target[i]);render()}
-  function check(){
-    if(solved)return;
-    if(letters.join('')===target){solved=true;selectedIndex=null;status.textContent='Locked in ✓';render();window.__birthdayUnscrambleSolved=true;window.letterComplete=true;window.__letterComplete=true}
-    else status.textContent='Not quite. Rearrange it.';
-  }
-
-  overlay.querySelector('#us-shuffle').onclick=reset;
-  overlay.querySelector('#us-check').onclick=check;
-  overlay.querySelector('#us-leave').onclick=()=>{overlay.classList.remove('show');selectedIndex=null};
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('show')&&!solved)overlay.classList.remove('show')});
-
-  function hideOldQuestionnaire(slide){
-    const needles=['fair coin','exactly two heads','sequence:','0 / 13'];
-    const hits=[...slide.querySelectorAll('*')].filter(el=>!el.children.length&&needles.some(n=>String(el.textContent||'').toLowerCase().includes(n)));
-    const hidden=new Set();
-    hits.forEach(hit=>{
-      let p=hit;
-      for(let depth=0;depth<7&&p&&p!==slide;depth++,p=p.parentElement){
-        const t=String(p.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
-        const game=t.includes('fair coin')||t.includes('exactly two heads')||t.includes('sequence:')||t.includes('0 / 13');
-        const controls=p.querySelector('button,input,select,textarea');
-        if(game&&controls&&t.length<650){hidden.add(p);break}
+    for (const leaf of leaves) {
+      let node = leaf;
+      for (let depth = 0; node && depth < 7; depth++, node = node.parentElement) {
+        if (node === slide || isClearlySlide(node)) break;
+        const t = lower(node);
+        const hasMarker = markers.some(m => t.includes(m));
+        const hasControl = !!node.querySelector('button,input,select,textarea');
+        if (hasMarker && hasControl && t.length <= 900) return node;
       }
-    });
-    hidden.forEach(el=>{el.style.setProperty('display','none','important');el.style.setProperty('visibility','hidden','important')});
-    hits.forEach(hit=>{if(!hit.closest('[data-unscramble-old-hidden]')){const t=String(hit.textContent||'').toLowerCase();if(needles.some(n=>t.includes(n))){hit.setAttribute('data-unscramble-old-hidden','1');hit.style.setProperty('display','none','important')}}});
+    }
+    return null;
   }
 
-  function slideActive(){return document.getElementById('sLetters')?.classList.contains('active')}
-  function enter(){const slide=document.getElementById('sLetters');if(!slide)return;hideOldQuestionnaire(slide);reset();overlay.classList.add('show')}
-  const tick=()=>{if(slideActive()){if(!opened){opened=true;enter()}}else{opened=false;overlay.classList.remove('show')}};
-  setInterval(tick,700);tick();
+  function hideOldCoinGame(slide) {
+    const old = findOldCoinGame(slide);
+    if (!old) return null;
+    if (!old.hasAttribute(HIDE_ATTR)) {
+      old.setAttribute(HIDE_ATTR, 'coin-toss');
+      old.style.setProperty('display', 'none', 'important');
+      old.style.setProperty('visibility', 'hidden', 'important');
+    }
+    return old;
+  }
+
+  // Older iterations of the replacement game created a second reveal block.
+  // Remove only nodes that are explicitly named as an old game/reveal artifact.
+  function removeOurOldDuplicate(slide) {
+    const selectors = [
+      '[data-final-fix-hidden="duplicate-reveal"]',
+      '.us-win',
+      '.us-success-reveal',
+      '#unscramble-success-reveal',
+      '[data-unscramble-reveal]'
+    ];
+    slide.querySelectorAll(selectors.join(',')).forEach(el => {
+      el.style.setProperty('display', 'none', 'important');
+      el.style.setProperty('visibility', 'hidden', 'important');
+    });
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    if (a.join('') === TARGET) return shuffle(arr);
+    return a;
+  }
+
+  function buildGame(mount) {
+    if (mount.querySelector('.ff-unscramble-root')) return;
+
+    const root = document.createElement('div');
+    root.className = 'ff-unscramble-root';
+    root.innerHTML = `
+      <div class="ff-unscramble-kicker">one last little problem</div>
+      <h2 class="ff-unscramble-title">Put this back together.</h2>
+      <div class="ff-unscramble-copy">The pieces are intentionally unhelpful. No hints. Just figure it out.</div>
+      <div class="ff-unscramble-board" aria-label="Unscramble the letters"></div>
+      <div class="ff-unscramble-actions">
+        <button class="ff-unscramble-btn" type="button" data-us-shuffle>Shuffle</button>
+        <button class="ff-unscramble-btn" type="button" data-us-check>Lock it in</button>
+      </div>
+      <div class="ff-unscramble-status" aria-live="polite"></div>
+    `;
+    mount.appendChild(root);
+
+    const board = root.querySelector('.ff-unscramble-board');
+    const status = root.querySelector('.ff-unscramble-status');
+    const shuffleBtn = root.querySelector('[data-us-shuffle]');
+    const checkBtn = root.querySelector('[data-us-check]');
+
+    const letters = TARGET.split('');
+    let order = START_ORDER.map(i => letters[i]);
+    let selected = -1;
+    let dragFrom = -1;
+    let solved = false;
+
+    function render() {
+      board.innerHTML = '';
+      order.forEach((letter, index) => {
+        const tile = document.createElement('div');
+        tile.className = 'ff-unscramble-tile' + (selected === index ? ' selected' : '') + (solved ? ' correct' : '');
+        tile.textContent = letter;
+        tile.draggable = !solved;
+        tile.dataset.index = String(index);
+
+        tile.addEventListener('click', () => {
+          if (solved) return;
+          if (selected < 0) selected = index;
+          else if (selected === index) selected = -1;
+          else {
+            [order[selected], order[index]] = [order[index], order[selected]];
+            selected = -1;
+            status.textContent = '';
+          }
+          render();
+        });
+
+        tile.addEventListener('dragstart', e => {
+          if (solved) return;
+          dragFrom = index;
+          tile.classList.add('dragging');
+          e.dataTransfer?.setData('text/plain', String(index));
+          if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+        });
+        tile.addEventListener('dragend', () => {
+          dragFrom = -1;
+          tile.classList.remove('dragging');
+        });
+        tile.addEventListener('dragover', e => {
+          if (!solved) e.preventDefault();
+        });
+        tile.addEventListener('drop', e => {
+          e.preventDefault();
+          if (solved) return;
+          const from = dragFrom >= 0 ? dragFrom : Number(e.dataTransfer?.getData('text/plain'));
+          const to = index;
+          if (Number.isInteger(from) && from >= 0 && from < order.length && from !== to) {
+            [order[from], order[to]] = [order[to], order[from]];
+            selected = -1;
+            status.textContent = '';
+            render();
+          }
+          dragFrom = -1;
+        });
+
+        board.appendChild(tile);
+      });
+    }
+
+    function reset(shuffleIt) {
+      solved = false;
+      selected = -1;
+      dragFrom = -1;
+      order = shuffleIt ? shuffle(letters) : START_ORDER.map(i => letters[i]);
+      status.textContent = 'Tap two letters to swap them, or drag them into place.';
+      shuffleBtn.disabled = false;
+      checkBtn.disabled = false;
+      render();
+    }
+
+    shuffleBtn.addEventListener('click', () => reset(true));
+    checkBtn.addEventListener('click', () => {
+      if (solved) return;
+      if (order.join('') !== TARGET) {
+        status.textContent = 'Not quite. Rearrange it.';
+        return;
+      }
+      solved = true;
+      selected = -1;
+      status.textContent = 'Locked in ✓';
+      render();
+      const note = document.createElement('div');
+      note.className = 'ff-unscramble-success';
+      note.textContent = 'YOU ARE (A)MAZ(I)NG';
+      root.appendChild(note);
+      window.letterComplete = true;
+      window.__letterComplete = true;
+      window.__birthdayUnscrambleSolved = true;
+      root.dispatchEvent(new CustomEvent('ff:unscramble-solved', { bubbles: true }));
+      shuffleBtn.disabled = true;
+      checkBtn.disabled = true;
+    });
+
+    reset(false);
+  }
+
+  let mountedSlide = null;
+  let tries = 0;
+
+  function apply() {
+    const slide = lettersSlide();
+    if (!slide) return false;
+    const old = hideOldCoinGame(slide);
+    removeOurOldDuplicate(slide);
+
+    let mount = slide.querySelector('.ff-unscramble-mount');
+    if (!mount) {
+      mount = document.createElement('div');
+      mount.className = 'ff-unscramble-mount';
+      if (old?.parentElement) old.parentElement.insertBefore(mount, old.nextSibling);
+      else slide.appendChild(mount);
+    }
+    buildGame(mount);
+    mountedSlide = slide;
+    return true;
+  }
+
+  function tick() {
+    tries++;
+    const slide = lettersSlide();
+    if (slide) {
+      apply();
+      if (active(slide)) return;
+    }
+    if (tries < 20) setTimeout(tick, 750);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(tick, 50), { once: true });
+  else setTimeout(tick, 50);
+
+  // Navigation in the existing experience changes .active. Observe only the
+  // relevant slide, not the whole document, and only while initialization is pending.
+  const startGuard = setInterval(() => {
+    if (mountedSlide || tries >= 20) {
+      clearInterval(startGuard);
+      return;
+    }
+    apply();
+  }, 900);
 })();

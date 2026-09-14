@@ -7617,4 +7617,59 @@ html.gate-locked #mouseScrollToggle,html.gate-locked #liveClockWrap,html.gate-lo
   .gate-access-top,.gate-access-foot{left:20px;right:20px}
 }
 </style>
+
+<style id="perf-smooth-v23">
+/* ── PERFORMANCE: kill layered glass blur (the main source of lag) ── */
+:root{--glass-blur:none}
+*,*::before,*::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+
+/* Opaque, cleaner surfaces so the design still reads premium without live blur */
+:root,html[data-theme="dark"]{
+  --surface-1:rgba(16,21,30,.96);--surface-2:rgba(25,32,43,.97);--surface-3:rgba(10,13,19,.95);
+  --surface-border:rgba(255,255,255,.10);--shadow-ambient:0 22px 60px rgba(0,0,0,.45);
+}
+html[data-theme="light"]{
+  --surface-1:rgba(255,254,250,.98);--surface-2:rgba(240,237,229,.98);--surface-3:rgba(255,254,250,.97);
+  --surface-border:rgba(20,26,34,.13);--shadow-ambient:0 20px 54px rgba(43,38,27,.12);
+}
+
+/* Cheaper decorative atmosphere: fewer huge blurred layers */
+.gate-orbit{filter:blur(46px)!important;opacity:.5!important;animation-duration:60s!important}
+.gate-grain{opacity:.05!important;animation:none!important}
+.gate-editorial::after{animation:none!important}
+
+/* Composite-only motion; avoid animating filters and shadows */
+*{text-rendering:optimizeSpeed}
+.gate-editorial h1,.gate-copy h2,#siteGateCard{will-change:auto}
+
+/* Smoother scrolling + snappier transitions */
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{text-rendering:optimizeLegibility}
+
+/* Touch devices: drop the most expensive ambient effects entirely */
+@media (hover:none) and (pointer:coarse){
+  .gate-orbit{display:none!important}
+  .gate-grain{display:none!important}
+  #stars,.stars{opacity:.55}
+  .gate-lang-flow{animation:none!important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.12s!important}
+  html{scroll-behavior:auto}
+}
+</style>
+<script>
+/* Pause offscreen ambient animation work and trim the starfield on weak devices. */
+(function(){
+  var weak = (navigator.hardwareConcurrency||4) <= 4 || /Android|iPhone|iPad/i.test(navigator.userAgent);
+  if(weak){
+    var st=document.createElement('style');
+    st.textContent='.star:nth-child(n+55){display:none!important}#stars .star:nth-child(n+55){display:none!important}';
+    document.head.appendChild(st);
+  }
+  document.addEventListener('visibilitychange',function(){
+    document.documentElement.style.setProperty('animation-play-state',document.hidden?'paused':'running');
+  });
+})();
+</script>
 </body></html>

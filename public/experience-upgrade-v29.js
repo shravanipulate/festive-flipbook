@@ -90,6 +90,8 @@
     return el;
   }
 
+  // Native YouTube embedded-player style: the selected video is rendered as
+  // an actual YouTube iframe inside the existing BGM search block.
   function ensurePlayer(block) {
     if (!block) return null;
     let frame = block.querySelector('#birthday-existing-yt-player');
@@ -97,9 +99,11 @@
       frame = document.createElement('iframe');
       frame.id = 'birthday-existing-yt-player';
       frame.title = 'YouTube player';
-      frame.allow = 'autoplay; encrypted-media; picture-in-picture';
+      frame.setAttribute('frameborder', '0');
+      frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+      frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
       frame.allowFullscreen = true;
-      frame.style.cssText = 'display:none;width:100%;height:170px;margin-top:7px;border:0;border-radius:12px;background:#000;';
+      frame.style.cssText = 'display:none;width:100%;aspect-ratio:16/9;height:auto;min-height:170px;margin-top:8px;border:0;border-radius:12px;background:#000;overflow:hidden;';
       block.appendChild(frame);
     }
     return frame;
@@ -135,7 +139,8 @@
     row.append(img, text);
 
     row.addEventListener('click', () => {
-      frame.src = `https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0`;
+      const origin = encodeURIComponent(window.location.origin);
+      frame.src = `https://www.youtube.com/embed/${video.id}?enablejsapi=1&origin=${origin}&playsinline=1&autoplay=1&rel=0`;
       frame.style.display = 'block';
       setStatus(status, '▶ Playing selected YouTube track');
     });

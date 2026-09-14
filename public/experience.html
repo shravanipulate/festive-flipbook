@@ -7672,4 +7672,10 @@ body{text-rendering:optimizeLegibility}
   });
 })();
 </script>
+<script>
+/* Keep floating deck controls hidden while the entrance is up. */
+(function(){var g=document.getElementById('siteGate'),r=document.documentElement;
+if(!g)return;function sync(){var open=getComputedStyle(g).display!=='none'&&g.style.opacity!=='0';r.classList.toggle('gate-locked',open);}
+sync();new MutationObserver(sync).observe(g,{attributes:true,attributeFilter:['style','class','hidden']});})();
+</script>
 </body></html>

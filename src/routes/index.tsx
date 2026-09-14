@@ -74,14 +74,6 @@ function Index() {
                                   footer.onload = () => {
                                     if (doc.getElementById("birthday-message-v22-script")) return;
                                     const message = doc.createElement("script"); message.id = "birthday-message-v22-script"; message.src = "/experience-upgrade-v22.js"; message.async = false;
-                                    message.onload = () => {
-                                      if (doc.getElementById("birthday-leave-v23-script")) return;
-                                      const leave = doc.createElement("script");
-                                      leave.id = "birthday-leave-v23-script";
-                                      leave.src = "/experience-upgrade-v23.js";
-                                      leave.async = false;
-                                      doc.body.appendChild(leave);
-                                    };
                                     doc.body.appendChild(message);
                                   };
                                   doc.body.appendChild(footer);

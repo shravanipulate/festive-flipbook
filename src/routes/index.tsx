@@ -113,6 +113,14 @@ function Index() {
                                   footer.id = "birthday-upgrade-v17-script";
                                   footer.src = "/experience-upgrade-v17.js";
                                   footer.async = false;
+                                  footer.onload = () => {
+                                    if (doc.getElementById("birthday-message-v22-script")) return;
+                                    const message = doc.createElement("script");
+                                    message.id = "birthday-message-v22-script";
+                                    message.src = "/experience-upgrade-v22.js";
+                                    message.async = false;
+                                    doc.body.appendChild(message);
+                                  };
                                   doc.body.appendChild(footer);
                                 };
                                 doc.body.appendChild(recorder);

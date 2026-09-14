@@ -68,4 +68,15 @@
   patchHeart();
   const observer = new MutationObserver(() => patchHeart());
   observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+
+  function loadV29(){
+    if(document.getElementById('birthday-upgrade-v29-script')) return;
+    const s=document.createElement('script');
+    s.id='birthday-upgrade-v29-script';
+    s.src='/experience-upgrade-v29.js';
+    s.async=false;
+    document.body.appendChild(s);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',loadV29,{once:true});
+  else loadV29();
 })();

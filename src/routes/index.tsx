@@ -69,19 +69,24 @@ function Index() {
                                 if (doc.getElementById("birthday-upgrade-v27-script")) return;
                                 const flipbook = doc.createElement("script"); flipbook.id = "birthday-upgrade-v27-script"; flipbook.src = "/experience-upgrade-v27.js"; flipbook.async = false;
                                 flipbook.onload = () => {
-                                  if (doc.getElementById("birthday-upgrade-v16-script")) return;
-                                  const recorder = doc.createElement("script"); recorder.id = "birthday-upgrade-v16-script"; recorder.src = "/experience-upgrade-v16.js"; recorder.async = false;
-                                  recorder.onload = () => {
-                                    if (doc.getElementById("birthday-upgrade-v17-script")) return;
-                                    const footer = doc.createElement("script"); footer.id = "birthday-upgrade-v17-script"; footer.src = "/experience-upgrade-v17.js"; footer.async = false;
-                                    footer.onload = () => {
-                                      if (doc.getElementById("birthday-message-v22-script")) return;
-                                      const message = doc.createElement("script"); message.id = "birthday-message-v22-script"; message.src = "/experience-upgrade-v22.js"; message.async = false;
-                                      doc.body.appendChild(message);
+                                  if (doc.getElementById("birthday-upgrade-v28-script")) return;
+                                  const polish = doc.createElement("script"); polish.id = "birthday-upgrade-v28-script"; polish.src = "/experience-upgrade-v28.js"; polish.async = false;
+                                  polish.onload = () => {
+                                    if (doc.getElementById("birthday-upgrade-v16-script")) return;
+                                    const recorder = doc.createElement("script"); recorder.id = "birthday-upgrade-v16-script"; recorder.src = "/experience-upgrade-v16.js"; recorder.async = false;
+                                    recorder.onload = () => {
+                                      if (doc.getElementById("birthday-upgrade-v17-script")) return;
+                                      const footer = doc.createElement("script"); footer.id = "birthday-upgrade-v17-script"; footer.src = "/experience-upgrade-v17.js"; footer.async = false;
+                                      footer.onload = () => {
+                                        if (doc.getElementById("birthday-message-v22-script")) return;
+                                        const message = doc.createElement("script"); message.id = "birthday-message-v22-script"; message.src = "/experience-upgrade-v22.js"; message.async = false;
+                                        doc.body.appendChild(message);
+                                      };
+                                      doc.body.appendChild(footer);
                                     };
-                                    doc.body.appendChild(footer);
+                                    doc.body.appendChild(recorder);
                                   };
-                                  doc.body.appendChild(recorder);
+                                  doc.body.appendChild(polish);
                                 };
                                 doc.body.appendChild(flipbook);
                               };
@@ -118,14 +123,12 @@ function Index() {
   return (
     <main className="fixed inset-0 bg-background">
       <style>{`#lovable-badge{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}`}</style>
-      <h1 className="sr-only">A Random Site ✦ — a birthday experience</h1>
       <iframe
         src="/experience.html"
-        title="A Random Site — birthday experience"
-        className="h-full w-full border-0"
-        onLoad={injectUpgrade}
+        title="A Random Site"
+        className="fixed inset-0 h-full w-full border-0"
         allow="camera; microphone; display-capture; autoplay; fullscreen; clipboard-write; accelerometer; gyroscope"
-        allowFullScreen
+        onLoad={injectUpgrade}
       />
     </main>
   );

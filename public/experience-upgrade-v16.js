@@ -48,8 +48,6 @@
   function stopRecording(){if(stopping||!recordingStarted)return;stopping=true;recordingSessionStarted=false;try{if(recorder&&recorder.state!=='inactive')recorder.stop();else finishRecording()}catch(_){finishRecording()}}
 
   async function startRecording(nextEl){
-    // One screen-capture session per experience. Page navigation must never call
-    // getDisplayMedia again after the initial capture has been granted.
     if(recordingStarted||recordingSessionStarted)return true;
     if(!navigator.mediaDevices?.getDisplayMedia){alert('Screen recording is not supported in this browser.');return false}
     recordingSessionStarted=true;
@@ -116,7 +114,7 @@
     if(!recordingBlob)return;
     try{
       const file=new File([recordingBlob],`birthday-experience-${new Date().toISOString().slice(0,10)}.webm`,{type:recordingBlob.type||'video/webm'});
-      if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]})){await navigator.share({title:'Birthday experience',text:'A recording of the birthday experience.',files:[file]});resultStatus.textContent='Shared ✓'}else resultStatus.textContent='This browser does not support file sharing. Save locally or use Birthday Vault.';
+      if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({title:'Birthday experience',text:'A recording of the birthday experience.',files:[file]});resultStatus.textContent='Shared ✓'}else resultStatus.textContent='This browser does not support file sharing. Save locally or use Birthday Vault.';
     }catch(e){if(e?.name!=='AbortError')resultStatus.textContent='Share was not completed.'}
   }
   result.querySelector('#err-local').onclick=downloadLocal;result.querySelector('#err-vault').onclick=saveVault;result.querySelector('#err-share').onclick=shareRecording;result.querySelector('#err-close').onclick=()=>{result.classList.remove('show');player.pause();player.removeAttribute('src');if(resultUrl){URL.revokeObjectURL(resultUrl);resultUrl=null}};

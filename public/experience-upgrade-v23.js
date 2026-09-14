@@ -5,14 +5,6 @@
   const RELOCK_KEY = 'chinmay-birthday-relock-after-leave-v1';
   const LEAVE_BTN_ID = 'birthday-leave-site';
   const GATE_ID = 'birthday-leave-password-gate';
-  const norm = s => String(s || '').replace(/\s+/g, ' ').trim();
-
-  function isVisible(el) {
-    if (!el) return false;
-    const r = el.getBoundingClientRect();
-    const cs = getComputedStyle(el);
-    return r.width > 0 && r.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden';
-  }
 
   function getSiteGatePassword() {
     try {
@@ -88,26 +80,13 @@
     button.title = 'Leave this birthday experience';
     button.addEventListener('click', () => {
       sessionStorage.setItem(RELOCK_KEY, 'yes');
-      try {
-        window.parent?.postMessage({ type: 'birthday-experience-left' }, '*');
-      } catch (_) {}
-      try {
-        if (document.fullscreenElement) document.exitFullscreen?.();
-      } catch (_) {}
-      try {
-        if (history.length > 1) history.back();
-        else location.href = 'about:blank';
-      } catch (_) {
-        location.href = 'about:blank';
-      }
+      showGate();
     });
     document.body.appendChild(button);
   }
 
   function relockIfNeeded() {
-    if (sessionStorage.getItem(RELOCK_KEY) === 'yes') {
-      showGate();
-    }
+    if (sessionStorage.getItem(RELOCK_KEY) === 'yes') showGate();
   }
 
   function init() {

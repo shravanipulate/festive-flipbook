@@ -72,19 +72,24 @@ function Index() {
                                   if (doc.getElementById("birthday-upgrade-v28-script")) return;
                                   const polish = doc.createElement("script"); polish.id = "birthday-upgrade-v28-script"; polish.src = "/experience-upgrade-v28.js"; polish.async = false;
                                   polish.onload = () => {
-                                    if (doc.getElementById("birthday-upgrade-v16-script")) return;
-                                    const recorder = doc.createElement("script"); recorder.id = "birthday-upgrade-v16-script"; recorder.src = "/experience-upgrade-v16.js"; recorder.async = false;
-                                    recorder.onload = () => {
-                                      if (doc.getElementById("birthday-upgrade-v17-script")) return;
-                                      const footer = doc.createElement("script"); footer.id = "birthday-upgrade-v17-script"; footer.src = "/experience-upgrade-v17.js"; footer.async = false;
-                                      footer.onload = () => {
-                                        if (doc.getElementById("birthday-message-v22-script")) return;
-                                        const message = doc.createElement("script"); message.id = "birthday-message-v22-script"; message.src = "/experience-upgrade-v22.js"; message.async = false;
-                                        doc.body.appendChild(message);
+                                    if (doc.getElementById("birthday-upgrade-v29-script")) return;
+                                    const youtube = doc.createElement("script"); youtube.id = "birthday-upgrade-v29-script"; youtube.src = "/experience-upgrade-v29.js"; youtube.async = false;
+                                    youtube.onload = () => {
+                                      if (doc.getElementById("birthday-upgrade-v16-script")) return;
+                                      const recorder = doc.createElement("script"); recorder.id = "birthday-upgrade-v16-script"; recorder.src = "/experience-upgrade-v16.js"; recorder.async = false;
+                                      recorder.onload = () => {
+                                        if (doc.getElementById("birthday-upgrade-v17-script")) return;
+                                        const footer = doc.createElement("script"); footer.id = "birthday-upgrade-v17-script"; footer.src = "/experience-upgrade-v17.js"; footer.async = false;
+                                        footer.onload = () => {
+                                          if (doc.getElementById("birthday-message-v22-script")) return;
+                                          const message = doc.createElement("script"); message.id = "birthday-message-v22-script"; message.src = "/experience-upgrade-v22.js"; message.async = false;
+                                          doc.body.appendChild(message);
+                                        };
+                                        doc.body.appendChild(footer);
                                       };
-                                      doc.body.appendChild(footer);
+                                      doc.body.appendChild(recorder);
                                     };
-                                    doc.body.appendChild(recorder);
+                                    doc.body.appendChild(youtube);
                                   };
                                   doc.body.appendChild(polish);
                                 };

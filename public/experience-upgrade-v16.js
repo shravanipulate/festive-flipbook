@@ -6,6 +6,7 @@
   const VAULT_PASSWORD='potentiallyavault';
   let displayStream=null,cameraStream=null,micStream=null,micSource=null,displayAudioSource=null,audioContext=null,audioDestination=null,recorder=null,chunks=[],recordingBlob=null,recordingStarted=false,stopping=false,continueAfterStart=null,bypassNextOnce=false;
   let keyboardNavigationAt=0;
+  let recordingSessionStarted=false;
 
   const style=document.createElement('style');style.textContent=`
     #experience-recorder-controls{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:2147483000;display:none;flex-direction:column;gap:8px;align-items:flex-start;font-family:inherit}
@@ -44,11 +45,14 @@
   function recorderStream(){const out=new MediaStream();displayStream.getVideoTracks().forEach(t=>out.addTrack(t));audioDestination?.stream.getAudioTracks().forEach(t=>out.addTrack(t));return out}
   function openResult(){live.classList.remove('show');controls.classList.remove('show');if(resultUrl)URL.revokeObjectURL(resultUrl);resultUrl=recordingBlob?URL.createObjectURL(recordingBlob):null;if(resultUrl){player.src=resultUrl;player.muted=true;player.currentTime=0;result.classList.add('show');setTimeout(()=>{player.play().catch(()=>{});},80)}}
   function finishRecording(){recordingStarted=false;stopping=false;const mime=recorder?.mimeType||'video/webm';if(chunks.length)recordingBlob=new Blob(chunks,{type:mime});cleanupMedia();if(recordingBlob?.size)openResult();else setStatus('Recording ended, but no video data was produced.');if(continueAfterStart){const el=continueAfterStart;continueAfterStart=null;bypassNextOnce=true;try{el.click()}catch(_){}}}
-  function stopRecording(){if(stopping||!recordingStarted)return;stopping=true;try{if(recorder&&recorder.state!=='inactive')recorder.stop();else finishRecording()}catch(_){finishRecording()}}
+  function stopRecording(){if(stopping||!recordingStarted)return;stopping=true;recordingSessionStarted=false;try{if(recorder&&recorder.state!=='inactive')recorder.stop();else finishRecording()}catch(_){finishRecording()}}
 
   async function startRecording(nextEl){
-    if(recordingStarted)return;
-    if(!navigator.mediaDevices?.getDisplayMedia){alert('Screen recording is not supported in this browser.');return}
+    // One screen-capture session per experience. Page navigation must never call
+    // getDisplayMedia again after the initial capture has been granted.
+    if(recordingStarted||recordingSessionStarted)return true;
+    if(!navigator.mediaDevices?.getDisplayMedia){alert('Screen recording is not supported in this browser.');return false}
+    recordingSessionStarted=true;
     try{
       displayStream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
       if(!displayStream?.getVideoTracks().length)throw new Error('No screen video track was returned.');
@@ -67,6 +71,7 @@
       if(nextEl){bypassNextOnce=true;nextEl.click()}
       return true;
     }catch(e){
+      recordingSessionStarted=false;
       const name=e?.name||'Error',msg=e?.message||'';
       setStatus(name==='NotAllowedError'?'Screen sharing was cancelled or blocked.':`Recording failed: ${name}${msg?' — '+msg:''}`);
       return false;
@@ -111,7 +116,7 @@
     if(!recordingBlob)return;
     try{
       const file=new File([recordingBlob],`birthday-experience-${new Date().toISOString().slice(0,10)}.webm`,{type:recordingBlob.type||'video/webm'});
-      if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({title:'Birthday experience',text:'A recording of the birthday experience.',files:[file]});resultStatus.textContent='Shared ✓'}else resultStatus.textContent='This browser does not support file sharing. Save locally or use Birthday Vault.';
+      if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]})){await navigator.share({title:'Birthday experience',text:'A recording of the birthday experience.',files:[file]});resultStatus.textContent='Shared ✓'}else resultStatus.textContent='This browser does not support file sharing. Save locally or use Birthday Vault.';
     }catch(e){if(e?.name!=='AbortError')resultStatus.textContent='Share was not completed.'}
   }
   result.querySelector('#err-local').onclick=downloadLocal;result.querySelector('#err-vault').onclick=saveVault;result.querySelector('#err-share').onclick=shareRecording;result.querySelector('#err-close').onclick=()=>{result.classList.remove('show');player.pause();player.removeAttribute('src');if(resultUrl){URL.revokeObjectURL(resultUrl);resultUrl=null}};
@@ -124,7 +129,7 @@
     const el=e.target?.closest?.('button,a,[role="button"],input[type="button"],input[type="submit"]');if(!el)return;
     if(bypassNextOnce&&isNextControl(el)){bypassNextOnce=false;return}
     if(isReplayControl(el)&&recordingStarted){e.preventDefault();e.stopImmediatePropagation();stopRecording();return}
-    if(!recordingStarted&&isNextControl(el)){
+    if(!recordingStarted&&!recordingSessionStarted&&isNextControl(el)){
       if(e.detail===0||Date.now()-keyboardNavigationAt<350)return;
       e.preventDefault();e.stopImmediatePropagation();startRecording(el);
     }

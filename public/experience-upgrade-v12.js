@@ -38,4 +38,26 @@
   const timer = setInterval(() => {
     if (install() || ++tries >= 40) clearInterval(timer);
   }, 100);
+
+  function replaceBirthdayMessage() {
+    const box = document.getElementById('pwMsg');
+    const p = box?.querySelector('p');
+    if (!p) return false;
+
+    p.innerHTML = `
+      Oh, it's "potentially" your birthday today, but I suppose the world can survive someone who believes there's always another level to unlock. 100 ke baad 101 bhi toh hai na.<br><br>
+      May you keep building, exploring the unexplored, questioning like 0!=1?, and yeah, being "self-obsessed" too. Hope 18 gives you more reasons to be proud and remember.<br><br>
+      Hope this was something unique that you haven't received or made. Ab "same" mat bolna lol T_T<br><br>
+      Btw, Ch(atgpt) = Ch(inmay) = Ch + preposition + gpt/may. Illogical logic, ik. 💀<br><br>
+      Had 17 more ideas, but calling it done before this becomes a post. And the dice idea? Nah. You don't need to roll - you're winning anyway. Heads/tail logic, iykyk.<br><br>
+      BGM ke liye YT coz I didn't wanna andazi your favourite. 3 unique sites hi banai hain total, in life, so manage the bugs lol.
+    `;
+    return true;
+  }
+
+  if (replaceBirthdayMessage()) return;
+  let messageTries = 0;
+  const messageTimer = setInterval(() => {
+    if (replaceBirthdayMessage() || ++messageTries >= 40) clearInterval(messageTimer);
+  }, 100);
 })();

@@ -1,9 +1,9 @@
 (() => {
-  if (window.__birthdayFinalGameV22Loaded) return;
-  window.__birthdayFinalGameV22Loaded = true;
+  if (window.__birthdayFinalGameV23Loaded) return;
+  window.__birthdayFinalGameV23Loaded = true;
 
   const TARGET = 'YOUAREAMAZING';
-  const START_ORDER = [7, 1, 10, 4, 12, 0, 8, 3, 11, 5, 2, 9, 6];
+  const START_ORDER = [7,1,10,4,12,0,8,3,11,5,2,9,6];
   const HIDE_ATTR = 'data-birthday-final-game-hidden';
 
   const style = document.createElement('style');
@@ -24,92 +24,85 @@
     .ff-unscramble-btn:disabled{opacity:.45;cursor:default}
     .ff-unscramble-status{min-height:18px;margin-top:10px;font-size:10px;opacity:.58}
     .ff-unscramble-success{margin-top:8px;font-size:12px;opacity:.78}
+    .ff-unscramble-reveal-note{margin-top:14px;font-size:10px;letter-spacing:.08em;opacity:.55}
   `;
   document.head.appendChild(style);
 
-  const text = el => String(el?.textContent || '').replace(/\s+/g, ' ').trim();
+  const text = el => String(el?.textContent || '').replace(/\s+/g,' ').trim();
   const lower = el => text(el).toLowerCase();
 
-  function lettersSlide() {
+  function lettersSlide(){
     return document.getElementById('sLetters') || document.querySelector('[id*="letters" i]');
   }
-
-  function active(el) {
-    return !!el && (el.classList.contains('active') || el.classList.contains('current') || getComputedStyle(el).display !== 'none');
-  }
-
-  function isClearlySlide(el) {
-    if (!el || el === document.body) return true;
-    const id = String(el.id || '');
-    const cls = typeof el.className === 'string' ? el.className : '';
+  function isClearlySlide(el){
+    if(!el || el===document.body)return true;
+    const id=String(el.id||'');
+    const cls=typeof el.className==='string'?el.className:'';
     return /^s[A-Z]/.test(id) || /\bslide\b/i.test(cls) || /slide/i.test(id);
   }
-
-  // Find only the old coin-toss component. Never climb into the slide itself.
-  function findOldCoinGame(slide) {
-    const markers = ['fair coin', 'exactly two heads', 'coin is tossed', 'sequence:'];
-    const leaves = [...slide.querySelectorAll('*')].filter(el => {
-      if (el.children.length) return false;
-      const t = lower(el);
-      return markers.some(m => t.includes(m));
-    });
-
-    for (const leaf of leaves) {
-      let node = leaf;
-      for (let depth = 0; node && depth < 7; depth++, node = node.parentElement) {
-        if (node === slide || isClearlySlide(node)) break;
-        const t = lower(node);
-        const hasMarker = markers.some(m => t.includes(m));
-        const hasControl = !!node.querySelector('button,input,select,textarea');
-        if (hasMarker && hasControl && t.length <= 900) return node;
+  function findOldCoinGame(slide){
+    const markers=['fair coin','exactly two heads','coin is tossed','sequence:'];
+    const leaves=[...slide.querySelectorAll('*')].filter(el=>!el.children.length&&markers.some(m=>lower(el).includes(m)));
+    for(const leaf of leaves){
+      let node=leaf;
+      for(let depth=0;node&&depth<7;depth++,node=node.parentElement){
+        if(node===slide||isClearlySlide(node))break;
+        const t=lower(node), hasControl=!!node.querySelector('button,input,select,textarea');
+        if(markers.some(m=>t.includes(m))&&hasControl&&t.length<=900)return node;
       }
     }
     return null;
   }
-
-  function hideOldCoinGame(slide) {
-    const old = findOldCoinGame(slide);
-    if (!old) return null;
-    if (!old.hasAttribute(HIDE_ATTR)) {
-      old.setAttribute(HIDE_ATTR, 'coin-toss');
-      old.style.setProperty('display', 'none', 'important');
-      old.style.setProperty('visibility', 'hidden', 'important');
-    }
+  function hideOldCoinGame(slide){
+    const old=findOldCoinGame(slide);
+    if(!old)return null;
+    old.setAttribute(HIDE_ATTR,'coin-toss');
+    old.style.setProperty('display','none','important');
+    old.style.setProperty('visibility','hidden','important');
     return old;
   }
 
-  // Older iterations of the replacement game created a second reveal block.
-  // Remove only nodes that are explicitly named as an old game/reveal artifact.
-  function removeOurOldDuplicate(slide) {
-    const selectors = [
-      '[data-final-fix-hidden="duplicate-reveal"]',
-      '.us-win',
-      '.us-success-reveal',
-      '#unscramble-success-reveal',
-      '[data-unscramble-reveal]'
-    ];
-    slide.querySelectorAll(selectors.join(',')).forEach(el => {
-      el.style.setProperty('display', 'none', 'important');
-      el.style.setProperty('visibility', 'hidden', 'important');
+  // Only remove artifacts explicitly created by older versions of this game.
+  // Never scan generic reveal/unlock/secret/easter classes.
+  function removeOldGameArtifacts(slide){
+    slide.querySelectorAll('[data-final-fix-hidden="duplicate-reveal"],.us-win,.us-success-reveal,#unscramble-success-reveal,[data-unscramble-reveal]').forEach(el=>{
+      el.style.setProperty('display','none','important');
+      el.style.setProperty('visibility','hidden','important');
     });
   }
 
-  function shuffle(arr) {
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
+  function showExistingEggChecklist(root){
+    const wrap=document.getElementById('eggRevealWrap');
+    const list=document.getElementById('eggRevealList');
+    if(typeof window.playEggRevealSequence==='function'&&wrap&&list){
+      // The original site owns the checklist and its EGG_LIST/eggFound state.
+      // Reuse it rather than recreating or guessing its contents.
+      wrap.style.display='block';
+      wrap.style.opacity='0';
+      wrap.style.transform='translateY(8px)';
+      wrap.style.transition='opacity .55s ease,transform .55s ease';
+      requestAnimationFrame(()=>{wrap.style.opacity='1';wrap.style.transform='translateY(0)';});
+      try{window.playEggRevealSequence();}catch(_){ }
+      return true;
     }
-    if (a.join('') === TARGET) return shuffle(arr);
+    return false;
+  }
+
+  function shuffle(arr){
+    const a=arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    if(a.join('')===TARGET)return shuffle(arr);
     return a;
   }
 
-  function buildGame(mount) {
-    if (mount.querySelector('.ff-unscramble-root')) return;
-
-    const root = document.createElement('div');
-    root.className = 'ff-unscramble-root';
-    root.innerHTML = `
+  function buildGame(mount){
+    if(mount.querySelector('.ff-unscramble-root'))return;
+    const root=document.createElement('div');
+    root.className='ff-unscramble-root';
+    root.innerHTML=`
       <div class="ff-unscramble-kicker">one last little problem</div>
       <h2 class="ff-unscramble-title">Put this back together.</h2>
       <div class="ff-unscramble-copy">The pieces are intentionally unhelpful. No hints. Just figure it out.</div>
@@ -122,148 +115,108 @@
     `;
     mount.appendChild(root);
 
-    const board = root.querySelector('.ff-unscramble-board');
-    const status = root.querySelector('.ff-unscramble-status');
-    const shuffleBtn = root.querySelector('[data-us-shuffle]');
-    const checkBtn = root.querySelector('[data-us-check]');
+    const board=root.querySelector('.ff-unscramble-board');
+    const status=root.querySelector('.ff-unscramble-status');
+    const shuffleBtn=root.querySelector('[data-us-shuffle]');
+    const checkBtn=root.querySelector('[data-us-check]');
+    const letters=TARGET.split('');
+    let order=START_ORDER.map(i=>letters[i]);
+    let selected=-1,dragFrom=-1,solved=false;
 
-    const letters = TARGET.split('');
-    let order = START_ORDER.map(i => letters[i]);
-    let selected = -1;
-    let dragFrom = -1;
-    let solved = false;
-
-    function render() {
-      board.innerHTML = '';
-      order.forEach((letter, index) => {
-        const tile = document.createElement('div');
-        tile.className = 'ff-unscramble-tile' + (selected === index ? ' selected' : '') + (solved ? ' correct' : '');
-        tile.textContent = letter;
-        tile.draggable = !solved;
-        tile.dataset.index = String(index);
-
-        tile.addEventListener('click', () => {
-          if (solved) return;
-          if (selected < 0) selected = index;
-          else if (selected === index) selected = -1;
-          else {
-            [order[selected], order[index]] = [order[index], order[selected]];
-            selected = -1;
-            status.textContent = '';
-          }
+    function render(){
+      board.innerHTML='';
+      order.forEach((letter,index)=>{
+        const tile=document.createElement('div');
+        tile.className='ff-unscramble-tile'+(selected===index?' selected':'')+(solved?' correct':'');
+        tile.textContent=letter;
+        tile.draggable=!solved;
+        tile.dataset.index=String(index);
+        tile.addEventListener('click',()=>{
+          if(solved)return;
+          if(selected<0)selected=index;
+          else if(selected===index)selected=-1;
+          else{[order[selected],order[index]]=[order[index],order[selected]];selected=-1;status.textContent='';}
           render();
         });
-
-        tile.addEventListener('dragstart', e => {
-          if (solved) return;
-          dragFrom = index;
-          tile.classList.add('dragging');
-          e.dataTransfer?.setData('text/plain', String(index));
-          if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+        tile.addEventListener('dragstart',e=>{
+          if(solved)return;
+          dragFrom=index;selected=-1;tile.classList.add('dragging');
+          if(e.dataTransfer){e.dataTransfer.setData('text/plain',String(index));e.dataTransfer.effectAllowed='move';}
         });
-        tile.addEventListener('dragend', () => {
-          dragFrom = -1;
-          tile.classList.remove('dragging');
-        });
-        tile.addEventListener('dragover', e => {
-          if (!solved) e.preventDefault();
-        });
-        tile.addEventListener('drop', e => {
+        tile.addEventListener('dragend',()=>{dragFrom=-1;tile.classList.remove('dragging');});
+        tile.addEventListener('dragover',e=>{if(!solved)e.preventDefault();});
+        tile.addEventListener('drop',e=>{
           e.preventDefault();
-          if (solved) return;
-          const from = dragFrom >= 0 ? dragFrom : Number(e.dataTransfer?.getData('text/plain'));
-          const to = index;
-          if (Number.isInteger(from) && from >= 0 && from < order.length && from !== to) {
-            [order[from], order[to]] = [order[to], order[from]];
-            selected = -1;
-            status.textContent = '';
-            render();
-          }
-          dragFrom = -1;
+          if(solved)return;
+          const from=dragFrom>=0?dragFrom:Number(e.dataTransfer?.getData('text/plain'));
+          if(Number.isInteger(from)&&from>=0&&from<order.length&&from!==index){[order[from],order[index]]=[order[index],order[from]];selected=-1;status.textContent='';render();}
+          dragFrom=-1;
         });
-
         board.appendChild(tile);
       });
     }
 
-    function reset(shuffleIt) {
-      solved = false;
-      selected = -1;
-      dragFrom = -1;
-      order = shuffleIt ? shuffle(letters) : START_ORDER.map(i => letters[i]);
-      status.textContent = 'Tap two letters to swap them, or drag them into place.';
-      shuffleBtn.disabled = false;
-      checkBtn.disabled = false;
+    function reset(shuffleIt){
+      solved=false;selected=-1;dragFrom=-1;
+      order=shuffleIt?shuffle(letters):START_ORDER.map(i=>letters[i]);
+      status.textContent='Tap two letters to swap them, or drag them into place.';
+      shuffleBtn.disabled=false;checkBtn.disabled=false;
       render();
     }
 
-    shuffleBtn.addEventListener('click', () => reset(true));
-    checkBtn.addEventListener('click', () => {
-      if (solved) return;
-      if (order.join('') !== TARGET) {
-        status.textContent = 'Not quite. Rearrange it.';
-        return;
-      }
-      solved = true;
-      selected = -1;
-      status.textContent = 'Locked in ✓';
-      render();
-      const note = document.createElement('div');
-      note.className = 'ff-unscramble-success';
-      note.textContent = 'YOU ARE (A)MAZ(I)NG';
+    shuffleBtn.addEventListener('click',()=>reset(true));
+    checkBtn.addEventListener('click',()=>{
+      if(solved)return;
+      if(order.join('')!==TARGET){status.textContent='Not quite. Rearrange it.';return;}
+      solved=true;selected=-1;status.textContent='Locked in ✓';render();
+
+      const note=document.createElement('div');
+      note.className='ff-unscramble-success';
+      note.innerHTML='<strong>YOU ARE (A)MAZ(I)NG.</strong><br><span>Okay. That one was actually deserved. ✦</span>';
       root.appendChild(note);
-      window.letterComplete = true;
-      window.__letterComplete = true;
-      window.__birthdayUnscrambleSolved = true;
-      root.dispatchEvent(new CustomEvent('ff:unscramble-solved', { bubbles: true }));
-      shuffleBtn.disabled = true;
-      checkBtn.disabled = true;
+      window.__birthdayUnscrambleSolved=true;
+      window.letterComplete=true;
+      window.__letterComplete=true;
+      shuffleBtn.disabled=true;checkBtn.disabled=true;
+
+      // Payoff: reveal the site's REAL existing Easter-egg checklist here.
+      // It remains the original registry, with the same found/missed state.
+      setTimeout(()=>{
+        const shown=showExistingEggChecklist(root);
+        if(!shown){
+          const fallback=document.createElement('div');
+          fallback.className='ff-unscramble-reveal-note';
+          fallback.textContent='SYSTEM LOG · RECOVERED';
+          root.appendChild(fallback);
+        }
+      },700);
     });
 
     reset(false);
   }
 
-  let mountedSlide = null;
-  let tries = 0;
-
-  function apply() {
-    const slide = lettersSlide();
-    if (!slide) return false;
-    const old = hideOldCoinGame(slide);
-    removeOurOldDuplicate(slide);
-
-    let mount = slide.querySelector('.ff-unscramble-mount');
-    if (!mount) {
-      mount = document.createElement('div');
-      mount.className = 'ff-unscramble-mount';
-      if (old?.parentElement) old.parentElement.insertBefore(mount, old.nextSibling);
+  function apply(){
+    const slide=lettersSlide();
+    if(!slide)return false;
+    const old=hideOldCoinGame(slide);
+    removeOldGameArtifacts(slide);
+    let mount=slide.querySelector('.ff-unscramble-mount');
+    if(!mount){
+      mount=document.createElement('div');
+      mount.className='ff-unscramble-mount';
+      if(old?.parentElement)old.parentElement.insertBefore(mount,old.nextSibling);
       else slide.appendChild(mount);
     }
     buildGame(mount);
-    mountedSlide = slide;
     return true;
   }
 
-  function tick() {
+  let tries=0;
+  function tick(){
     tries++;
-    const slide = lettersSlide();
-    if (slide) {
-      apply();
-      if (active(slide)) return;
-    }
-    if (tries < 20) setTimeout(tick, 750);
+    if(apply())return;
+    if(tries<20)setTimeout(tick,750);
   }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(tick, 50), { once: true });
-  else setTimeout(tick, 50);
-
-  // Navigation in the existing experience changes .active. Observe only the
-  // relevant slide, not the whole document, and only while initialization is pending.
-  const startGuard = setInterval(() => {
-    if (mountedSlide || tries >= 20) {
-      clearInterval(startGuard);
-      return;
-    }
-    apply();
-  }, 900);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(tick,50),{once:true});
+  else setTimeout(tick,50);
 })();

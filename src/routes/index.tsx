@@ -72,8 +72,8 @@ function Index() {
                                   if (doc.getElementById("birthday-upgrade-v28-script")) return;
                                   const polish = doc.createElement("script"); polish.id = "birthday-upgrade-v28-script"; polish.src = "/experience-upgrade-v28.js"; polish.async = false;
                                   polish.onload = () => {
-                                    if (doc.getElementById("birthday-upgrade-v30-script")) return;
-                                    const youtube = doc.createElement("script"); youtube.id = "birthday-upgrade-v30-script"; youtube.src = "/experience-upgrade-v30.js"; youtube.async = false;
+                                    if (doc.getElementById("birthday-upgrade-v31-script")) return;
+                                    const youtube = doc.createElement("script"); youtube.id = "birthday-upgrade-v31-script"; youtube.src = "/experience-upgrade-v31.js"; youtube.async = false;
                                     youtube.onload = () => {
                                       if (doc.getElementById("birthday-upgrade-v16-script")) return;
                                       const recorder = doc.createElement("script"); recorder.id = "birthday-upgrade-v16-script"; recorder.src = "/experience-upgrade-v16.js"; recorder.async = false;

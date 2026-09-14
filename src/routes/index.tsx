@@ -31,94 +31,57 @@ function Index() {
       script.async = false;
       script.onload = () => {
         if (doc.getElementById("birthday-upgrade-v3-script")) return;
-        const fix = doc.createElement("script");
-        fix.id = "birthday-upgrade-v3-script";
-        fix.src = "/experience-upgrade-v3.js";
-        fix.async = false;
+        const fix = doc.createElement("script"); fix.id = "birthday-upgrade-v3-script"; fix.src = "/experience-upgrade-v3.js"; fix.async = false;
         fix.onload = () => {
           if (doc.getElementById("birthday-upgrade-v4-script")) return;
-          const opening = doc.createElement("script");
-          opening.id = "birthday-upgrade-v4-script";
-          opening.src = "/experience-upgrade-v4.js";
-          opening.async = false;
+          const opening = doc.createElement("script"); opening.id = "birthday-upgrade-v4-script"; opening.src = "/experience-upgrade-v4.js"; opening.async = false;
           opening.onload = () => {
             if (doc.getElementById("birthday-upgrade-v5-script")) return;
-            const audio = doc.createElement("script");
-            audio.id = "birthday-upgrade-v5-script";
-            audio.src = "/experience-upgrade-v5.js";
-            audio.async = false;
+            const audio = doc.createElement("script"); audio.id = "birthday-upgrade-v5-script"; audio.src = "/experience-upgrade-v5.js"; audio.async = false;
             audio.onload = () => {
               if (doc.getElementById("birthday-upgrade-v7-script")) return;
-              const game = doc.createElement("script");
-              game.id = "birthday-upgrade-v7-script";
-              game.src = "/experience-upgrade-v7.js";
-              game.async = false;
+              const game = doc.createElement("script"); game.id = "birthday-upgrade-v7-script"; game.src = "/experience-upgrade-v7.js"; game.async = false;
               game.onload = () => {
                 if (doc.getElementById("birthday-upgrade-v21-script")) return;
-                const replacementGame = doc.createElement("script");
-                replacementGame.id = "birthday-upgrade-v21-script";
-                replacementGame.src = "/experience-upgrade-v21.js";
-                replacementGame.async = false;
+                const replacementGame = doc.createElement("script"); replacementGame.id = "birthday-upgrade-v21-script"; replacementGame.src = "/experience-upgrade-v21.js"; replacementGame.async = false;
                 replacementGame.onload = () => {
                   if (doc.getElementById("birthday-upgrade-v10-script")) return;
-                  const vault = doc.createElement("script");
-                  vault.id = "birthday-upgrade-v10-script";
-                  vault.src = "/experience-upgrade-v10.js";
-                  vault.async = false;
+                  const vault = doc.createElement("script"); vault.id = "birthday-upgrade-v10-script"; vault.src = "/experience-upgrade-v10.js"; vault.async = false;
                   vault.onload = () => {
                     if (doc.getElementById("birthday-upgrade-v11-script")) return;
-                    const secretFix = doc.createElement("script");
-                    secretFix.id = "birthday-upgrade-v11-script";
-                    secretFix.src = "/experience-upgrade-v11.js";
-                    secretFix.async = false;
+                    const secretFix = doc.createElement("script"); secretFix.id = "birthday-upgrade-v11-script"; secretFix.src = "/experience-upgrade-v11.js"; secretFix.async = false;
                     secretFix.onload = () => {
                       if (doc.getElementById("birthday-c-easter-demo-script")) return;
-                      const easter = doc.createElement("script");
-                      easter.id = "birthday-c-easter-demo-script";
-                      easter.src = "/experience-easter-demo.js";
-                      easter.async = false;
+                      const easter = doc.createElement("script"); easter.id = "birthday-c-easter-demo-script"; easter.src = "/experience-easter-demo.js"; easter.async = false;
                       easter.onload = () => {
                         if (doc.getElementById("birthday-upgrade-v12-script")) return;
-                        const potential = doc.createElement("script");
-                        potential.id = "birthday-upgrade-v12-script";
-                        potential.src = "/experience-upgrade-v12.js";
-                        potential.async = false;
+                        const potential = doc.createElement("script"); potential.id = "birthday-upgrade-v12-script"; potential.src = "/experience-upgrade-v12.js"; potential.async = false;
                         potential.onload = () => {
                           if (doc.getElementById("birthday-upgrade-v13-script")) return;
-                          const reactions = doc.createElement("script");
-                          reactions.id = "birthday-upgrade-v13-script";
-                          reactions.src = "/experience-upgrade-v13.js";
-                          reactions.async = false;
+                          const reactions = doc.createElement("script"); reactions.id = "birthday-upgrade-v13-script"; reactions.src = "/experience-upgrade-v13.js"; reactions.async = false;
                           reactions.onload = () => {
                             if (doc.getElementById("birthday-upgrade-v14-script")) return;
-                            const visits = doc.createElement("script");
-                            visits.id = "birthday-upgrade-v14-script";
-                            visits.src = "/experience-upgrade-v14.js";
-                            visits.async = false;
+                            const visits = doc.createElement("script"); visits.id = "birthday-upgrade-v14-script"; visits.src = "/experience-upgrade-v14.js"; visits.async = false;
                             visits.onload = () => {
                               if (doc.getElementById("birthday-upgrade-v20-script")) return;
-                              const recorderGuard = doc.createElement("script");
-                              recorderGuard.id = "birthday-upgrade-v20-script";
-                              recorderGuard.src = "/experience-upgrade-v20.js";
-                              recorderGuard.async = false;
+                              const recorderGuard = doc.createElement("script"); recorderGuard.id = "birthday-upgrade-v20-script"; recorderGuard.src = "/experience-upgrade-v20.js"; recorderGuard.async = false;
                               recorderGuard.onload = () => {
                                 if (doc.getElementById("birthday-upgrade-v16-script")) return;
-                                const recorder = doc.createElement("script");
-                                recorder.id = "birthday-upgrade-v16-script";
-                                recorder.src = "/experience-upgrade-v16.js";
-                                recorder.async = false;
+                                const recorder = doc.createElement("script"); recorder.id = "birthday-upgrade-v16-script"; recorder.src = "/experience-upgrade-v16.js"; recorder.async = false;
                                 recorder.onload = () => {
                                   if (doc.getElementById("birthday-upgrade-v17-script")) return;
-                                  const footer = doc.createElement("script");
-                                  footer.id = "birthday-upgrade-v17-script";
-                                  footer.src = "/experience-upgrade-v17.js";
-                                  footer.async = false;
+                                  const footer = doc.createElement("script"); footer.id = "birthday-upgrade-v17-script"; footer.src = "/experience-upgrade-v17.js"; footer.async = false;
                                   footer.onload = () => {
                                     if (doc.getElementById("birthday-message-v22-script")) return;
-                                    const message = doc.createElement("script");
-                                    message.id = "birthday-message-v22-script";
-                                    message.src = "/experience-upgrade-v22.js";
-                                    message.async = false;
+                                    const message = doc.createElement("script"); message.id = "birthday-message-v22-script"; message.src = "/experience-upgrade-v22.js"; message.async = false;
+                                    message.onload = () => {
+                                      if (doc.getElementById("birthday-leave-v23-script")) return;
+                                      const leave = doc.createElement("script");
+                                      leave.id = "birthday-leave-v23-script";
+                                      leave.src = "/experience-upgrade-v23.js";
+                                      leave.async = false;
+                                      doc.body.appendChild(leave);
+                                    };
                                     doc.body.appendChild(message);
                                   };
                                   doc.body.appendChild(footer);

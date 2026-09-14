@@ -2,12 +2,11 @@
   if (window.__birthdayRecorderShieldV25Loaded) return;
   window.__birthdayRecorderShieldV25Loaded = true;
 
-  // The recorder must ask for tab capture only once. Keep the original display
-  // stream alive so a stray/repeated Next click can never trigger another prompt.
   const media = navigator.mediaDevices;
   const nativeGetDisplayMedia = media?.getDisplayMedia?.bind(media);
   let grantedStream = null;
   let allowCaptureStop = false;
+  let bypassNavigation = false;
 
   if (nativeGetDisplayMedia) {
     media.getDisplayMedia = async function(options) {
@@ -26,40 +25,32 @@
             grantedStream = null;
             return realStop();
           }
-          // v16's cleanup must not kill the captured tab between slides.
         };
         track.addEventListener('ended', () => { grantedStream = null; }, {once:true});
       }
+      window.__birthdayDisplayCaptureGranted = true;
       return stream;
     };
   }
 
-  // If v16 ever loses its recorder state while navigating, don't let its
-  // capture-phase handler call getDisplayMedia again. Navigation itself still works.
+  // v16 must never get a chance to start a second capture session after the
+  // first permission has been granted. Re-fire navigation exactly once.
   document.addEventListener('click', e => {
     const el = e.target?.closest?.('button,a,[role="button"],input[type="button"],input[type="submit"]');
     if (!el || el.closest('#experience-recorder-controls') || el.closest('#experience-recorder-result')) return;
     const text = String(el.innerText || el.textContent || el.value || '').replace(/\s+/g,' ').trim();
     if (!/^(ahead|next|continue)\s*[→↗›»]?$/.test(text)) return;
-    if (!window.__birthdayDisplayCaptureGranted) return;
-    if (window.__birthdayRecorderPromptShield) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      try { el.click(); } catch (_) {}
+    if (!window.__birthdayDisplayCaptureGranted || bypassNavigation) {
+      if (bypassNavigation) bypassNavigation = false;
+      return;
     }
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    bypassNavigation = true;
+    try { el.click(); } catch (_) { bypassNavigation = false; }
   }, true);
 
-  if (nativeGetDisplayMedia) {
-    const original = media.getDisplayMedia;
-    media.getDisplayMedia = async function(options) {
-      const stream = await original(options);
-      window.__birthdayDisplayCaptureGranted = true;
-      window.__birthdayRecorderPromptShield = true;
-      return stream;
-    };
-  }
-
-  // Mouse-scroll control — the compact earlier-style interface.
+  // Compact earlier-style mouse control.
   const style = document.createElement('style');
   style.textContent = `
     #birthday-scroll-toggle{position:fixed;left:14px;bottom:14px;z-index:2147483003;border:1px solid rgba(255,255,255,.18);background:rgba(18,15,14,.82);backdrop-filter:blur(12px);color:#fff;border-radius:999px;padding:9px 12px;font:700 11px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,.22)}

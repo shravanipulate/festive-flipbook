@@ -1,8 +1,8 @@
 (() => {
-  if (window.__birthdayRecorderControlsV2) return;
-  window.__birthdayRecorderControlsV2 = true;
+  if (window.__birthdayRecorderControlsV3) return;
+  window.__birthdayRecorderControlsV3 = true;
 
-  // Kill the legacy MP3 audio immediately if an old cached/base element still exists.
+  // Remove only the legacy MP3 used by the old BGM audio control.
   const removeLegacyBgmAudio = () => {
     document.querySelectorAll('audio').forEach(audio => {
       const src = audio.currentSrc || audio.src || audio.querySelector('source')?.src || '';
@@ -23,7 +23,7 @@
     const bgm = candidates.find(el => /^(?:🎵\s*)?BGM\s*(?:OFF|ON)$/i.test((el.textContent || el.value || '').replace(/\s+/g, ' ').trim()));
     if (!bgm) return false;
 
-    // Replace ONLY the old BGM OFF/ON control, in its exact DOM position.
+    // Same DOM position as the old BGM OFF/ON control.
     const replacement = document.createElement('button');
     replacement.id = 'birthday-recorder-controls-button';
     replacement.type = 'button';
@@ -53,11 +53,23 @@
       panel.style.top = `${Math.max(8, Math.min(window.innerHeight - 95, r.bottom + 6))}px`;
     };
 
+    const syncLabels = () => {
+      const camera = document.querySelector('#erc-camera');
+      const mic = document.querySelector('#erc-mic');
+      const videoToggle = panel.querySelector('#br-video-toggle');
+      const audioToggle = panel.querySelector('#br-audio-toggle');
+      if (camera && videoToggle) videoToggle.textContent = /ON$/i.test(camera.textContent || '') ? '📹 Video ON' : '📹 Video OFF';
+      if (mic && audioToggle) audioToggle.textContent = /ON$/i.test(mic.textContent || '') ? '🎙️ Audio ON' : '🎙️ Audio OFF';
+    };
+
     replacement.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
       const opening = panel.style.display === 'none';
-      if (opening) positionPanel();
+      if (opening) {
+        positionPanel();
+        syncLabels();
+      }
       panel.style.display = opening ? 'block' : 'none';
     });
 
@@ -71,7 +83,7 @@
       const recorderButton = document.querySelector('#erc-camera');
       if (!recorderButton) return;
       recorderButton.click();
-      e.currentTarget.textContent = /ON$/i.test(recorderButton.textContent || '') ? '📹 Video ON' : '📹 Video OFF';
+      setTimeout(syncLabels, 0);
     });
 
     panel.querySelector('#br-audio-toggle').addEventListener('click', e => {
@@ -80,30 +92,17 @@
       const recorderButton = document.querySelector('#erc-mic');
       if (!recorderButton) return;
       recorderButton.click();
-      e.currentTarget.textContent = /ON$/i.test(recorderButton.textContent || '') ? '🎙️ Audio ON' : '🎙️ Audio OFF';
+      setTimeout(syncLabels, 0);
     });
-
-    // Keep the dropdown labels synchronized with the recorder's real state.
-    const sync = () => {
-      const camera = document.querySelector('#erc-camera');
-      const mic = document.querySelector('#erc-mic');
-      const videoToggle = panel.querySelector('#br-video-toggle');
-      const audioToggle = panel.querySelector('#br-audio-toggle');
-      if (camera && videoToggle) videoToggle.textContent = /ON$/i.test(camera.textContent || '') ? '📹 Video ON' : '📹 Video OFF';
-      if (mic && audioToggle) audioToggle.textContent = /ON$/i.test(mic.textContent || '') ? '🎙️ Audio ON' : '🎙️ Audio OFF';
-    };
-    const observer = new MutationObserver(sync);
-    observer.observe(document.body, { subtree: true, childList: true, characterData: true });
-    sync();
 
     return true;
   };
 
   if (!boot()) {
-    const observer = new MutationObserver(() => {
-      if (boot()) observer.disconnect();
-    });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    setTimeout(() => observer.disconnect(), 15000);
+    // Lightweight polling while the original experience creates its BGM control.
+    let tries = 0;
+    const timer = setInterval(() => {
+      if (boot() || ++tries >= 60) clearInterval(timer);
+    }, 250);
   }
 })();

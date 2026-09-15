@@ -1,19 +1,33 @@
 (() => {
-  if (window.__birthdayRecorderControlsV1) return;
-  window.__birthdayRecorderControlsV1 = true;
+  if (window.__birthdayRecorderControlsV2) return;
+  window.__birthdayRecorderControlsV2 = true;
+
+  // Kill the legacy MP3 audio immediately if an old cached/base element still exists.
+  const removeLegacyBgmAudio = () => {
+    document.querySelectorAll('audio').forEach(audio => {
+      const src = audio.currentSrc || audio.src || audio.querySelector('source')?.src || '';
+      if (/screen-capture.*cut_1sec.*\.mp3/i.test(src)) {
+        try { audio.pause(); } catch (_) {}
+        audio.removeAttribute('src');
+        audio.load();
+        audio.remove();
+      }
+    });
+  };
 
   const boot = () => {
+    removeLegacyBgmAudio();
     if (document.getElementById('birthday-recorder-controls-button')) return true;
 
     const candidates = [...document.querySelectorAll('button,a,[role="button"],input[type="button"],input[type="submit"]')];
     const bgm = candidates.find(el => /^(?:🎵\s*)?BGM\s*(?:OFF|ON)$/i.test((el.textContent || el.value || '').replace(/\s+/g, ' ').trim()));
     if (!bgm) return false;
 
-    // Remove only the old BGM OFF/ON control. Do not touch the existing BGM feature/panel.
+    // Replace ONLY the old BGM OFF/ON control, in its exact DOM position.
     const replacement = document.createElement('button');
     replacement.id = 'birthday-recorder-controls-button';
     replacement.type = 'button';
-    replacement.textContent = '⚙ Controls';
+    replacement.textContent = '⚙ Controls ▾';
     replacement.className = bgm.className || '';
     replacement.style.cssText = bgm.style.cssText || '';
     replacement.setAttribute('aria-label', 'Recording controls');
@@ -23,41 +37,73 @@
     panel.id = 'birthday-recorder-controls-panel';
     panel.innerHTML = `
       <button type="button" id="br-video-toggle">📹 Video OFF</button>
-      <button type="button" id="br-audio-toggle">🎙️ Audio OFF</button>
-      <button type="button" id="br-controls-close">× Close</button>`;
-    panel.style.cssText = 'display:none;position:absolute;z-index:2147483000;min-width:155px;padding:8px;border-radius:14px;background:rgba(18,15,14,.96);border:1px solid rgba(255,255,255,.16);box-shadow:0 15px 45px rgba(0,0,0,.35);backdrop-filter:blur(12px);';
-    panel.querySelectorAll('button').forEach(b => b.style.cssText = 'display:block;width:100%;margin:3px 0;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;border-radius:9px;padding:8px 10px;cursor:pointer;font:700 11px inherit;text-align:left;');
+      <button type="button" id="br-audio-toggle">🎙️ Audio OFF</button>`;
+    panel.style.cssText = 'display:none;position:fixed;z-index:2147483000;min-width:170px;padding:8px;border-radius:14px;background:rgba(18,15,14,.97);border:1px solid rgba(255,255,255,.16);box-shadow:0 15px 45px rgba(0,0,0,.35);backdrop-filter:blur(12px);';
+    panel.querySelectorAll('button').forEach(b => {
+      b.style.cssText = 'display:block;width:100%;margin:3px 0;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;border-radius:9px;padding:8px 10px;cursor:pointer;font:700 11px inherit;text-align:left;';
+    });
 
     bgm.replaceWith(replacement);
     document.body.appendChild(panel);
 
-    replacement.addEventListener('click', e => {
-      e.preventDefault(); e.stopPropagation();
+    const positionPanel = () => {
       const r = replacement.getBoundingClientRect();
-      panel.style.left = `${Math.max(8, Math.min(window.innerWidth - 175, r.left))}px`;
-      panel.style.top = `${Math.min(window.innerHeight - 145, r.bottom + 6)}px`;
-      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    });
-    panel.querySelector('#br-controls-close').addEventListener('click', () => panel.style.display = 'none');
+      const width = 180;
+      panel.style.left = `${Math.max(8, Math.min(window.innerWidth - width - 8, r.left))}px`;
+      panel.style.top = `${Math.max(8, Math.min(window.innerHeight - 95, r.bottom + 6))}px`;
+    };
 
-    // These toggles are intentionally UI-only here; the recorder's own camera/mic controls remain authoritative.
-    panel.querySelector('#br-video-toggle').addEventListener('click', () => {
-      const b = panel.querySelector('#br-video-toggle');
-      b.textContent = b.textContent.includes('OFF') ? '📹 Video ON' : '📹 Video OFF';
-      document.querySelector('#erc-camera')?.click();
+    replacement.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const opening = panel.style.display === 'none';
+      if (opening) positionPanel();
+      panel.style.display = opening ? 'block' : 'none';
     });
-    panel.querySelector('#br-audio-toggle').addEventListener('click', () => {
-      const b = panel.querySelector('#br-audio-toggle');
-      b.textContent = b.textContent.includes('OFF') ? '🎙️ Audio ON' : '🎙️ Audio OFF';
-      document.querySelector('#erc-mic')?.click();
+
+    window.addEventListener('resize', () => {
+      if (panel.style.display !== 'none') positionPanel();
+    }, { passive: true });
+
+    panel.querySelector('#br-video-toggle').addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const recorderButton = document.querySelector('#erc-camera');
+      if (!recorderButton) return;
+      recorderButton.click();
+      e.currentTarget.textContent = /ON$/i.test(recorderButton.textContent || '') ? '📹 Video ON' : '📹 Video OFF';
     });
+
+    panel.querySelector('#br-audio-toggle').addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const recorderButton = document.querySelector('#erc-mic');
+      if (!recorderButton) return;
+      recorderButton.click();
+      e.currentTarget.textContent = /ON$/i.test(recorderButton.textContent || '') ? '🎙️ Audio ON' : '🎙️ Audio OFF';
+    });
+
+    // Keep the dropdown labels synchronized with the recorder's real state.
+    const sync = () => {
+      const camera = document.querySelector('#erc-camera');
+      const mic = document.querySelector('#erc-mic');
+      const videoToggle = panel.querySelector('#br-video-toggle');
+      const audioToggle = panel.querySelector('#br-audio-toggle');
+      if (camera && videoToggle) videoToggle.textContent = /ON$/i.test(camera.textContent || '') ? '📹 Video ON' : '📹 Video OFF';
+      if (mic && audioToggle) audioToggle.textContent = /ON$/i.test(mic.textContent || '') ? '🎙️ Audio ON' : '🎙️ Audio OFF';
+    };
+    const observer = new MutationObserver(sync);
+    observer.observe(document.body, { subtree: true, childList: true, characterData: true });
+    sync();
 
     return true;
   };
 
   if (!boot()) {
-    const observer = new MutationObserver(() => { if (boot()) observer.disconnect(); });
-    observer.observe(document.documentElement, {childList:true, subtree:true});
+    const observer = new MutationObserver(() => {
+      if (boot()) observer.disconnect();
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
     setTimeout(() => observer.disconnect(), 15000);
   }
 })();

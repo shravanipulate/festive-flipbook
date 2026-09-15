@@ -33,6 +33,20 @@
     });
   };
 
+  const replaceRoadAheadLine = () => {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => {
+      const value = node.nodeValue || '';
+      const next = value.replace(
+        /Dude really looked like he had a five-year plan at approximately zero years old\.\s*\^\.\^/g,
+        'Bro really looked like he had a five-year plan at approximately zero years old. ^.^'
+      );
+      if (next !== value) node.nodeValue = next;
+    });
+  };
+
   const removeAmbientBgm = () => {
     const btn = document.getElementById('ambientBtn');
     if (!btn) return false;
@@ -53,6 +67,7 @@
       scheduled = false;
       cleanFirstName();
       replaceContactNumber();
+      replaceRoadAheadLine();
       removeAmbientBgm();
     });
   };

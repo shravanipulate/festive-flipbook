@@ -9,6 +9,7 @@ const UPGRADE_SCRIPTS = [
   "experience-vault-position.js",
   "experience-upgrade-v3.js",
   "experience-upgrade-v4.js",
+  "experience-upgrade-v5.js",
   "experience-upgrade-v7.js",
   "experience-upgrade-v21.js",
   "experience-upgrade-v10.js",
@@ -25,7 +26,6 @@ const UPGRADE_SCRIPTS = [
   "experience-upgrade-v16.js",
   "experience-upgrade-v17.js",
   "experience-upgrade-v22.js",
-  "experience-recorder-controls.js",
 ] as const;
 
 export const Route = createFileRoute("/")({

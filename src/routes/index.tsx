@@ -46,8 +46,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const injectUpgrades = async (event: React.SyntheticEvent<HTMLIFrameElement>) => {
-    const frame = event.currentTarget;
+  const injectUpgrades = async (event: any) => {
+    const frame = event.currentTarget as HTMLIFrameElement;
 
     try {
       const doc = frame.contentDocument;

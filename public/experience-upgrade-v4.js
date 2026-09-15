@@ -58,13 +58,8 @@
     return true;
   };
 
-  let scheduled = false;
-  let timer = null;
   const boot = () => {
-    if (scheduled) return;
-    scheduled = true;
     requestAnimationFrame(() => {
-      scheduled = false;
       cleanFirstName();
       replaceContactNumber();
       replaceRoadAheadLine();
@@ -73,8 +68,7 @@
   };
 
   boot();
-  new MutationObserver(() => {
-    clearTimeout(timer);
-    timer = setTimeout(boot, 600);
-  }).observe(document.body, { subtree: true, childList: true, characterData: true });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  }
 })();

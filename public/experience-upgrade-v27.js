@@ -97,13 +97,7 @@
   turn.id = 'birthday-page-turn';
   document.body.appendChild(turn);
 
-  const visible = el => {
-    if (!el) return false;
-    const r = el.getBoundingClientRect(), s = getComputedStyle(el);
-    return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden' && s.opacity !== '0';
-  };
   const slides = () => [...document.querySelectorAll('#app .slide, .slide')];
-  const activeIndex = () => slides().findIndex(s => s.classList.contains('active'));
 
   function refresh() {
     const list = slides();
@@ -123,20 +117,20 @@
     }, 650);
   }
 
-  function findNext() {
-    const el = document.getElementById('navNext');
-    return visible(el) ? el : null;
-  }
-  function findPrev() {
-    const el = document.getElementById('navPrev');
-    return visible(el) ? el : null;
+  // The original navigation controls are often intentionally hidden by the
+  // experience. Programmatic click() still works, so visibility must not be
+  // used as the gate for navigation.
+  function findNavControl(id) {
+    const el = document.getElementById(id);
+    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return null;
+    return el;
   }
 
   function go(direction) {
     if (document.getElementById('pi-challenge-overlay')?.classList.contains('show')) return;
     if (document.getElementById('experience-recorder-result')?.classList.contains('show')) return;
 
-    const target = direction === 'next' ? findNext() : findPrev();
+    const target = findNavControl(direction === 'next' ? 'navNext' : 'navPrev');
     if (!target) return;
 
     playTurn(direction === 'next' ? 'next' : 'prev');

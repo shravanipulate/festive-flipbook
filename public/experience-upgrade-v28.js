@@ -29,7 +29,7 @@
       #birthday-flip-nav .birthday-flip-arrow.right{right:10px!important}
     }
 
-    /* Reply slide: plain static 🫶🏻 — absolutely no heartbeat/pulse/glow. */
+    /* Reply slide: plain static ✨ — absolutely no heartbeat/pulse/glow. */
     .resp-icon,
     .resp-icon *{
       animation:none!important;
@@ -56,7 +56,7 @@
     candidates.forEach(el => {
       if (el.dataset.v28HeartDone) return;
       el.dataset.v28HeartDone='1';
-      el.textContent='🫶🏻';
+      el.textContent='✨';
       el.style.animation='none';
       el.style.filter='none';
       el.style.transform='none';

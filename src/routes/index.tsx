@@ -76,7 +76,7 @@ function Index() {
                                     const youtube = doc.createElement("script"); youtube.id = "birthday-upgrade-v32-script"; youtube.src = "/experience-upgrade-v32.js"; youtube.async = false;
                                     youtube.onload = () => {
                                       if (doc.getElementById("birthday-upgrade-v33-script")) return;
-                                      const youtubeFull = doc.createElement("script"); youtubeFull.id = "birthday-upgrade-v33-script"; youtubeFull.src = "/experience-upgrade-v33.js"; youtubeFull.async = false;
+                                      const youtubeFull = doc.createElement("script"); youtubeFull.id = "birthday-upgrade-v33-script"; youtubeFull.src = "/experience-upgrade-v33.js?v=20260915-indexx"; youtubeFull.async = false;
                                       youtubeFull.onload = () => {
                                         if (doc.getElementById("birthday-upgrade-v16-script")) return;
                                         const recorder = doc.createElement("script"); recorder.id = "birthday-upgrade-v16-script"; recorder.src = "/experience-upgrade-v16.js"; recorder.async = false;

@@ -3,6 +3,7 @@
   if (window.__birthdayYouTubeExistingSearchV32) return;
   window.__birthdayYouTubeExistingSearchV32 = true;
 
+  // YouTube Data API v3 is used only for search. Playback uses the IFrame Player API.
   const API_KEY = 'AIzaSyC78Uq8hOGxYE4s46QPwgk9vHa122LRgoM';
   const SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
   let ytApiPromise = null;
@@ -10,6 +11,7 @@
 
   const panel = () => document.getElementById('bgmPanel');
   const clean = s => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 100);
+  const escapeHtml = s => String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
   function findInput() {
     const p = panel();
@@ -89,6 +91,7 @@
     if (player?.loadVideoById) {
       player.loadVideoById(id);
       try { player.unMute(); player.setVolume(70); player.playVideo(); } catch (_) {}
+      setStatus(ui.status, `▶ Playing: ${title}`);
       return;
     }
     player = new YT.Player(ui.host, {
@@ -111,7 +114,7 @@
     ui.results.innerHTML = '';
     try {
       const url = new URL(SEARCH_URL);
-      url.search = new URLSearchParams({ part:'snippet', q, type:'video', maxResults:'10', order:'relevance', key:API_KEY });
+      url.search = new URLSearchParams({ part:'snippet', q, type:'video', videoEmbeddable:'true', maxResults:'5', order:'relevance', key:API_KEY });
       const r = await fetch(url, { cache:'no-store' });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) {
@@ -119,13 +122,13 @@
         throw new Error(reason ? `${data?.error?.message || 'YouTube API error'} [${reason}]` : (data?.error?.message || `HTTP ${r.status}`));
       }
       const videos = (data.items || []).map(x => ({ id:x?.id?.videoId, title:x?.snippet?.title || 'Untitled', channel:x?.snippet?.channelTitle || '', thumb:x?.snippet?.thumbnails?.medium?.url || x?.snippet?.thumbnails?.default?.url || '' })).filter(x => x.id);
-      if (!videos.length) { setStatus(ui.status, 'YouTube returned 0 results. Try the exact song title + artist.'); return; }
-      setStatus(ui.status, `▶ ${videos.length} results — choose one`);
+      if (!videos.length) { setStatus(ui.status, 'No results found. Try the exact song title + artist.'); return; }
+      setStatus(ui.status, 'Choose a song:');
       for (const v of videos) {
         const b = document.createElement('button');
         b.type = 'button';
         b.style.cssText = 'display:grid;grid-template-columns:76px 1fr;gap:7px;align-items:center;width:100%;padding:5px;border:1px solid rgba(0,0,0,.08);border-radius:10px;background:rgba(255,255,255,.45);color:inherit;text-align:left;cursor:pointer;';
-        b.innerHTML = `<img src="${v.thumb}" alt="" style="width:76px;height:43px;object-fit:cover;border-radius:7px;background:#000"><span style="min-width:0"><span style="display:block;font-size:.72rem;line-height:1.2;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.title.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}</span><span style="display:block;font-size:.58rem;opacity:.65;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.channel.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}</span></span>`;
+        b.innerHTML = `<img src="${escapeHtml(v.thumb)}" alt="" style="width:76px;height:43px;object-fit:cover;border-radius:7px;background:#000"><span style="min-width:0"><span style="display:block;font-size:.72rem;line-height:1.2;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(v.title)}</span><span style="display:block;font-size:.58rem;opacity:.65;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(v.channel)}</span></span>`;
         b.addEventListener('click', () => play(v.id, v.title, ui).catch(e => setStatus(ui.status, `⚠️ ${e.message || 'Player failed'}`)));
         ui.results.appendChild(b);
       }

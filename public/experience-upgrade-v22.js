@@ -25,10 +25,4 @@
   const timer = setInterval(() => {
     if (apply() || ++tries >= 80) clearInterval(timer);
   }, 100);
-
-  // Final interaction repair is loaded last, after every legacy upgrade has run.
-  const repair = document.createElement('script');
-  repair.src = '/experience-upgrade-v45.js?v=20260915-interaction-fix';
-  repair.async = false;
-  document.body.appendChild(repair);
 })();

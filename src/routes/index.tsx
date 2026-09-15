@@ -26,7 +26,6 @@ const UPGRADE_SCRIPTS = [
   "experience-upgrade-v16.js",
   "experience-upgrade-v17.js",
   "experience-upgrade-v22.js",
-  "experience-recorder-controls-v20.js",
 ] as const;
 
 export const Route = createFileRoute("/")({

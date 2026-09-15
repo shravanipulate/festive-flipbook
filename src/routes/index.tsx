@@ -4,11 +4,9 @@ const TITLE = "A Random Site ✦ — a birthday made just for you";
 const DESCRIPTION =
   "A private 32-page birthday experience: letters, candles, games, secrets and a replay archive to watch it all again.";
 
-// Keep the iframe experience intact, but load only the final, non-duplicated
-// feature layers in a predictable order. The old chain had multiple competing
-// YouTube/navigation patches and a broad interaction-repair script.
 const UPGRADE_SCRIPTS = [
   "experience-upgrade-v2.js",
+  "experience-vault-position.js",
   "experience-upgrade-v3.js",
   "experience-upgrade-v4.js",
   "experience-upgrade-v5.js",
@@ -46,9 +44,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const injectUpgrades = async (event: any) => {
+  const injectUpgrades = (event: any) => {
     const frame = event.currentTarget as HTMLIFrameElement;
-
     try {
       const doc = frame.contentDocument;
       if (!doc?.body || doc.getElementById("birthday-upgrade-loader")) return;
@@ -77,8 +74,7 @@ function Index() {
       `;
       doc.body.appendChild(loader);
     } catch {
-      // Same-origin in production; keep the original experience intact if
-      // upgrade injection is unavailable.
+      // Same-origin in production; keep the original experience intact if injection fails.
     }
   };
 

@@ -28,23 +28,25 @@
     const style = document.createElement('style');
     style.id = 'birthday-youtube-indexx-style';
     style.textContent = `
-.yt-bgm-box { margin-top:10px; padding:10px; border-radius:12px; background:rgba(127,127,127,.08); border:1px solid rgba(127,127,127,.15); }
+.yt-bgm-box { position:relative; z-index:10001; pointer-events:auto; margin-top:10px; padding:10px; border-radius:12px; background:rgba(127,127,127,.08); border:1px solid rgba(127,127,127,.15); }
+.yt-bgm-box input, .yt-bgm-box button, .yt-bgm-box .yt-result { position:relative; z-index:10002; pointer-events:auto!important; }
 .yt-bgm-title { font-size:12px; font-weight:800; margin-bottom:8px; letter-spacing:.4px; }
-.yt-search-row { display:flex; gap:6px; }
-#ytSearchInput { flex:1; min-width:0; padding:8px 9px; border-radius:8px; border:1px solid rgba(127,127,127,.25); background:var(--card,#fff); color:inherit; outline:none; font:inherit; font-size:13px; }
+.yt-search-row { display:flex; gap:6px; position:relative; z-index:10002; }
+#ytSearchInput { flex:1; min-width:0; padding:8px 9px; border-radius:8px; border:1px solid rgba(127,127,127,.25); background:var(--card,#fff); color:inherit; outline:none; font:inherit; font-size:13px; pointer-events:auto!important; }
 #ytSearchInput:focus { border-color:currentColor; }
-#ytSearchBtn { padding:8px 10px; border:0; border-radius:8px; cursor:pointer; font-weight:800; font-size:10px; background:currentColor; color:var(--bg,#fff); }
+#ytSearchBtn { padding:8px 10px; border:0; border-radius:8px; cursor:pointer; font-weight:800; font-size:10px; background:currentColor; color:var(--bg,#fff); pointer-events:auto!important; }
 #ytSearchStatus { font-size:10px; opacity:.65; margin-top:7px; }
-#ytResults { display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:230px; overflow-y:auto; }
+#ytResults { display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:230px; overflow-y:auto; position:relative; z-index:10002; pointer-events:auto; }
 .yt-result { display:flex; align-items:center; gap:8px; padding:6px; border-radius:9px; cursor:pointer; border:1px solid rgba(127,127,127,.12); transition:transform .15s ease, background .15s ease; }
 .yt-result:hover { transform:translateY(-1px); background:rgba(127,127,127,.08); }
-.yt-result img { width:58px; height:34px; object-fit:cover; border-radius:5px; flex-shrink:0; }
-.yt-result-info { min-width:0; }
+.yt-result img { width:58px; height:34px; object-fit:cover; border-radius:5px; flex-shrink:0; pointer-events:none; }
+.yt-result-info { min-width:0; pointer-events:none; }
 .yt-result-title { font-size:11px; font-weight:700; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .yt-result-channel { font-size:9px; opacity:.6; margin-top:2px; }
-#ytPlayerWrap { display:none; margin-top:9px; border-radius:10px; overflow:hidden; aspect-ratio:16/9; }
+#ytPlayerWrap { display:none; margin-top:9px; border-radius:10px; overflow:hidden; aspect-ratio:16/9; position:relative; z-index:10001; }
 #ytPlayer { width:100%; height:100%; }
-#yt-standalone-container { position: fixed; bottom: 20px; right: 20px; width: 280px; background: rgba(20, 20, 30, 0.95); border: 1px solid rgba(200, 200, 200, 0.3); border-radius: 12px; padding: 12px; z-index: 10000; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
+#yt-standalone-container { position:fixed; bottom:20px; right:20px; width:280px; background:rgba(20,20,30,.95); border:1px solid rgba(200,200,200,.3); border-radius:12px; padding:12px; z-index:10000; backdrop-filter:blur(10px); box-shadow:0 8px 32px rgba(0,0,0,.3); pointer-events:auto; }
+#yt-standalone-container input, #yt-standalone-container button, #yt-standalone-container .yt-result { pointer-events:auto!important; }
 `;
     document.head.appendChild(style);
   }
@@ -52,11 +54,10 @@
   function installUI() {
     const panel = document.getElementById('bgmPanel');
     if (!panel) {
-      // bgmPanel doesn't exist, create standalone search in a more visible location
       installStandaloneUI();
       return;
     }
-    
+
     if (panel.querySelector('.yt-bgm-box')) return true;
 
     const row = panel.querySelector('.bgm-row') || panel;
@@ -64,23 +65,13 @@
     box.className = 'yt-bgm-box';
     box.innerHTML = `
 <div class="yt-bgm-title">🎧 Search YouTube</div>
-
 <div class="yt-search-row">
-  <input
-    id="ytSearchInput"
-    type="text"
-    placeholder="Search any song..."
-    autocomplete="off"
-  />
-  <button id="ytSearchBtn">SEARCH</button>
+  <input id="ytSearchInput" type="text" placeholder="Search any song..." autocomplete="off" />
+  <button id="ytSearchBtn" type="button">SEARCH</button>
 </div>
-
 <div id="ytSearchStatus"></div>
 <div id="ytResults"></div>
-
-<div id="ytPlayerWrap">
-  <div id="ytPlayer"></div>
-</div>`;
+<div id="ytPlayerWrap"><div id="ytPlayer"></div></div>`;
 
     const track1 = row.querySelector('#bgmTrack1Btn');
     if (track1) row.insertBefore(box, track1.nextSibling);
@@ -89,35 +80,21 @@
   }
 
   function installStandaloneUI() {
-    // Create a visible container for YouTube search if bgmPanel doesn't exist
     if (document.getElementById('yt-standalone-container')) return;
-    
+
     const container = document.createElement('div');
     container.id = 'yt-standalone-container';
-    
     container.innerHTML = `
-<div class="yt-bgm-box" style="margin: 0; background: transparent; border: none;">
+<div class="yt-bgm-box" style="margin:0;background:transparent;border:none;">
   <div class="yt-bgm-title">🎧 Search YouTube</div>
-  
   <div class="yt-search-row">
-    <input
-      id="ytSearchInput"
-      type="text"
-      placeholder="Search any song..."
-      autocomplete="off"
-    />
-    <button id="ytSearchBtn" style="background: #0077BE; color: #fff;">GO</button>
+    <input id="ytSearchInput" type="text" placeholder="Search any song..." autocomplete="off" />
+    <button id="ytSearchBtn" type="button">GO</button>
   </div>
-  
   <div id="ytSearchStatus"></div>
   <div id="ytResults"></div>
-  
-  <div id="ytPlayerWrap">
-    <div id="ytPlayer"></div>
-  </div>
-</div>
-    `;
-    
+  <div id="ytPlayerWrap"><div id="ytPlayer"></div></div>
+</div>`;
     document.body.appendChild(container);
   }
 
@@ -141,11 +118,9 @@
     const input = document.getElementById('ytSearchInput');
     const resultsBox = document.getElementById('ytResults');
     const status = document.getElementById('ytSearchStatus');
-
     if (!input || !resultsBox || !status) return;
 
     const query = input.value.trim();
-
     if (!query) {
       status.textContent = 'Type a song name first 😭';
       resultsBox.innerHTML = '';
@@ -156,8 +131,7 @@
     resultsBox.innerHTML = '';
 
     try {
-      const url =
-        'https://www.googleapis.com/youtube/v3/search' +
+      const url = 'https://www.googleapis.com/youtube/v3/search' +
         '?part=snippet' +
         '&q=' + encodeURIComponent(query) +
         '&type=video' +
@@ -180,17 +154,25 @@
       }
 
       status.textContent = 'Choose a song:';
-
       data.items.forEach(item => {
         const videoId = item.id.videoId;
+        if (!videoId) return;
         const title = item.snippet.title;
         const channel = item.snippet.channelTitle;
         const thumbnail = item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url;
 
         const result = document.createElement('div');
         result.className = 'yt-result';
+        result.tabIndex = 0;
+        result.setAttribute('role', 'button');
         result.innerHTML = `<img src="${thumbnail}" alt=""><div class="yt-result-info"><div class="yt-result-title">${escapeHtml(title)}</div><div class="yt-result-channel">${escapeHtml(channel)}</div></div>`;
-        result.onclick = () => { playYouTubeBgm(videoId, title); };
+        result.onclick = () => playYouTubeBgm(videoId, title);
+        result.onkeydown = event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            playYouTubeBgm(videoId, title);
+          }
+        };
         resultsBox.appendChild(result);
       });
     } catch (error) {
@@ -209,7 +191,6 @@
 
     try {
       const YT = await waitForYT();
-
       if (ytPlayer) {
         ytPlayer.loadVideoById(videoId);
       } else {
@@ -233,20 +214,18 @@
     const input = document.getElementById('ytSearchInput');
     if (!input || input.dataset.birthdayYoutubeIndexx === '1') return;
     input.dataset.birthdayYoutubeIndexx = '1';
-    
-    // Wire up button click
+
     const btn = document.getElementById('ytSearchBtn');
-    if (btn) {
-      btn.onclick = (e) => {
-        e.preventDefault();
-        searchYouTubeBgm();
-      };
-    }
-    
-    // Wire up Enter key
-    input.addEventListener('keydown', function(event) {
+    if (btn) btn.onclick = e => {
+      e.preventDefault();
+      e.stopPropagation();
+      searchYouTubeBgm();
+    };
+
+    input.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         event.preventDefault();
+        event.stopPropagation();
         searchYouTubeBgm();
       }
     });
@@ -259,11 +238,8 @@
     wire();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once:true });
-  } else {
-    boot();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true });
+  else boot();
 
   const observer = new MutationObserver(() => {
     if (document.getElementById('bgmPanel') && !document.querySelector('.yt-bgm-box')) boot();

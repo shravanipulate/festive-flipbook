@@ -31,7 +31,7 @@
 .yt-bgm-box { margin-top:10px; padding:10px; border-radius:12px; background:rgba(127,127,127,.08); border:1px solid rgba(127,127,127,.15); }
 .yt-bgm-title { font-size:12px; font-weight:800; margin-bottom:8px; letter-spacing:.4px; }
 .yt-search-row { display:flex; gap:6px; }
-#ytSearchInput { flex:1; min-width:0; padding:8px 9px; border-radius:8px; border:1px solid rgba(127,127,127,.25); background:var(--card,#fff); color:inherit; outline:none; font:inherit; font-size:12px; }
+#ytSearchInput { flex:1; min-width:0; padding:8px 9px; border-radius:8px; border:1px solid rgba(127,127,127,.25); background:var(--card,#fff); color:inherit; outline:none; font:inherit; font-size:13px; }
 #ytSearchInput:focus { border-color:currentColor; }
 #ytSearchBtn { padding:8px 10px; border:0; border-radius:8px; cursor:pointer; font-weight:800; font-size:10px; background:currentColor; color:var(--bg,#fff); }
 #ytSearchStatus { font-size:10px; opacity:.65; margin-top:7px; }
@@ -44,13 +44,19 @@
 .yt-result-channel { font-size:9px; opacity:.6; margin-top:2px; }
 #ytPlayerWrap { display:none; margin-top:9px; border-radius:10px; overflow:hidden; aspect-ratio:16/9; }
 #ytPlayer { width:100%; height:100%; }
+#yt-standalone-container { position: fixed; bottom: 20px; right: 20px; width: 280px; background: rgba(20, 20, 30, 0.95); border: 1px solid rgba(200, 200, 200, 0.3); border-radius: 12px; padding: 12px; z-index: 10000; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
 `;
     document.head.appendChild(style);
   }
 
   function installUI() {
     const panel = document.getElementById('bgmPanel');
-    if (!panel) return false;
+    if (!panel) {
+      // bgmPanel doesn't exist, create standalone search in a more visible location
+      installStandaloneUI();
+      return;
+    }
+    
     if (panel.querySelector('.yt-bgm-box')) return true;
 
     const row = panel.querySelector('.bgm-row') || panel;
@@ -66,7 +72,7 @@
     placeholder="Search any song..."
     autocomplete="off"
   />
-  <button id="ytSearchBtn" onclick="searchYouTubeBgm()">SEARCH</button>
+  <button id="ytSearchBtn">SEARCH</button>
 </div>
 
 <div id="ytSearchStatus"></div>
@@ -80,6 +86,39 @@
     if (track1) row.insertBefore(box, track1.nextSibling);
     else row.appendChild(box);
     return true;
+  }
+
+  function installStandaloneUI() {
+    // Create a visible container for YouTube search if bgmPanel doesn't exist
+    if (document.getElementById('yt-standalone-container')) return;
+    
+    const container = document.createElement('div');
+    container.id = 'yt-standalone-container';
+    
+    container.innerHTML = `
+<div class="yt-bgm-box" style="margin: 0; background: transparent; border: none;">
+  <div class="yt-bgm-title">🎧 Search YouTube</div>
+  
+  <div class="yt-search-row">
+    <input
+      id="ytSearchInput"
+      type="text"
+      placeholder="Search any song..."
+      autocomplete="off"
+    />
+    <button id="ytSearchBtn" style="background: #0077BE; color: #fff;">GO</button>
+  </div>
+  
+  <div id="ytSearchStatus"></div>
+  <div id="ytResults"></div>
+  
+  <div id="ytPlayerWrap">
+    <div id="ytPlayer"></div>
+  </div>
+</div>
+    `;
+    
+    document.body.appendChild(container);
   }
 
   function waitForYT() {
@@ -194,6 +233,17 @@
     const input = document.getElementById('ytSearchInput');
     if (!input || input.dataset.birthdayYoutubeIndexx === '1') return;
     input.dataset.birthdayYoutubeIndexx = '1';
+    
+    // Wire up button click
+    const btn = document.getElementById('ytSearchBtn');
+    if (btn) {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        searchYouTubeBgm();
+      };
+    }
+    
+    // Wire up Enter key
     input.addEventListener('keydown', function(event) {
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -205,7 +255,8 @@
   function boot() {
     installCSS();
     loadYouTubeIframeAPI();
-    if (installUI()) wire();
+    installUI();
+    wire();
   }
 
   if (document.readyState === 'loading') {

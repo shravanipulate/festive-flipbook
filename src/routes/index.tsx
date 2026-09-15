@@ -4,9 +4,6 @@ const TITLE = "A Random Site ✦ — a birthday made just for you";
 const DESCRIPTION =
   "A private 32-page birthday experience: letters, candles, games, secrets and a replay archive to watch it all again.";
 
-// Keep the scripts that affect the opening/slide navigation ready first.
-// Visual-only and end-of-experience extras are loaded during browser idle time
-// so they cannot compete with slide transitions for the main thread.
 const CRITICAL_SCRIPTS = [
   "experience-upgrade-v2.js",
   "experience-vault-position.js",
@@ -56,6 +53,17 @@ function Index() {
       const doc = frame.contentDocument;
       if (!doc?.body || doc.getElementById("birthday-upgrade-loader")) return;
 
+      // Fetch the upgrade files in parallel, but do not execute them yet.
+      // The actual execution remains ordered so existing feature dependencies
+      // are preserved while network latency is removed from the critical path.
+      [...CRITICAL_SCRIPTS, ...IDLE_SCRIPTS].forEach(src => {
+        const link = doc.createElement("link");
+        link.rel = "preload";
+        link.as = "script";
+        link.href = "/" + src;
+        doc.head.appendChild(link);
+      });
+
       const loader = doc.createElement("script");
       loader.id = "birthday-upgrade-loader";
       loader.textContent = `
@@ -75,29 +83,29 @@ function Index() {
             document.body.appendChild(script);
           });
 
-          const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
+          const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
 
           (async () => {
-            // Yield between upgrades so no chain of DOM work becomes one long task.
             for (const src of critical) {
               await loadScript(src);
               await nextFrame();
             }
 
-            // Never make the opening experience wait for optional extras.
             const runIdle = () => {
               let i = 0;
               const pump = (deadline) => {
-                while (i < idle.length && (deadline?.timeRemaining?.() > 8 || !deadline)) {
+                // Execute at most one optional upgrade per idle slice. This keeps
+                // slide animations responsive even on slower laptops/phones.
+                if (i < idle.length && (deadline?.timeRemaining?.() > 8 || !deadline)) {
                   loadScript(idle[i++]);
                 }
                 if (i < idle.length) {
                   if (window.requestIdleCallback) requestIdleCallback(pump, { timeout: 1800 });
-                  else setTimeout(() => pump(null), 120);
+                  else setTimeout(() => pump(null), 140);
                 }
               };
               if (window.requestIdleCallback) requestIdleCallback(pump, { timeout: 1200 });
-              else setTimeout(() => pump(null), 250);
+              else setTimeout(() => pump(null), 300);
             };
             runIdle();
           })();

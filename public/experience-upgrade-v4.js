@@ -33,6 +33,17 @@
     });
   };
 
+  const removeAmbientBgm = () => {
+    const btn = document.getElementById('ambientBtn');
+    if (!btn) return false;
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }, true);
+    btn.remove();
+    return true;
+  };
+
   let scheduled = false;
   let timer = null;
   const boot = () => {
@@ -42,6 +53,7 @@
       scheduled = false;
       cleanFirstName();
       replaceContactNumber();
+      removeAmbientBgm();
     });
   };
 

@@ -4,7 +4,10 @@ const TITLE = "A Random Site ✦ — a birthday made just for you";
 const DESCRIPTION =
   "A private 32-page birthday experience: letters, candles, games, secrets and a replay archive to watch it all again.";
 
-const UPGRADE_SCRIPTS = [
+// Keep the scripts that affect the opening/slide navigation ready first.
+// Visual-only and end-of-experience extras are loaded during browser idle time
+// so they cannot compete with slide transitions for the main thread.
+const CRITICAL_SCRIPTS = [
   "experience-upgrade-v2.js",
   "experience-vault-position.js",
   "experience-upgrade-v3.js",
@@ -18,13 +21,16 @@ const UPGRADE_SCRIPTS = [
   "experience-upgrade-v12.js",
   "experience-upgrade-v13.js",
   "experience-upgrade-v14.js",
+  "experience-upgrade-v16.js",
+  "experience-upgrade-v17.js",
+] as const;
+
+const IDLE_SCRIPTS = [
   "experience-upgrade-v25.js",
   "experience-upgrade-v27.js",
   "experience-upgrade-v28.js",
   "experience-upgrade-v32.js",
   "experience-upgrade-v33.js",
-  "experience-upgrade-v16.js",
-  "experience-upgrade-v17.js",
   "experience-upgrade-v22.js",
 ] as const;
 
@@ -54,22 +60,47 @@ function Index() {
       loader.id = "birthday-upgrade-loader";
       loader.textContent = `
         (() => {
-          const scripts = ${JSON.stringify(UPGRADE_SCRIPTS)};
-          let index = 0;
-          const loadNext = () => {
-            if (index >= scripts.length) return;
-            const src = scripts[index++];
+          const critical = ${JSON.stringify(CRITICAL_SCRIPTS)};
+          const idle = ${JSON.stringify(IDLE_SCRIPTS)};
+
+          const loadScript = (src) => new Promise((resolve) => {
             const script = document.createElement('script');
             script.src = '/' + src;
             script.async = false;
-            script.onload = loadNext;
+            script.onload = resolve;
             script.onerror = () => {
               console.error('[Birthday] Failed to load', src);
-              loadNext();
+              resolve();
             };
             document.body.appendChild(script);
-          };
-          loadNext();
+          });
+
+          const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
+
+          (async () => {
+            // Yield between upgrades so no chain of DOM work becomes one long task.
+            for (const src of critical) {
+              await loadScript(src);
+              await nextFrame();
+            }
+
+            // Never make the opening experience wait for optional extras.
+            const runIdle = () => {
+              let i = 0;
+              const pump = (deadline) => {
+                while (i < idle.length && (deadline?.timeRemaining?.() > 8 || !deadline)) {
+                  loadScript(idle[i++]);
+                }
+                if (i < idle.length) {
+                  if (window.requestIdleCallback) requestIdleCallback(pump, { timeout: 1800 });
+                  else setTimeout(() => pump(null), 120);
+                }
+              };
+              if (window.requestIdleCallback) requestIdleCallback(pump, { timeout: 1200 });
+              else setTimeout(() => pump(null), 250);
+            };
+            runIdle();
+          })();
         })();
       `;
       doc.body.appendChild(loader);
